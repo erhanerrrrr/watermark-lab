@@ -1,0 +1,170 @@
+protocol:
+  id: wm-course-v1
+  version: 1
+  seed: 42
+  notes: >-
+    M2 fixed protocol. Every pipeline preserves the original HxW output shape so
+    all watermark methods receive identical attacked images.
+
+cases:
+  - id: clean
+    category: control
+    pipeline: [{name: identity}]
+
+  - id: jpeg_q90
+    category: single
+    pipeline: [{name: jpeg, quality: 90}]
+  - id: jpeg_q80
+    category: single
+    pipeline: [{name: jpeg, quality: 80}]
+  - id: jpeg_q50
+    category: single
+    pipeline: [{name: jpeg, quality: 50}]
+  - id: jpeg_q30
+    category: single
+    pipeline: [{name: jpeg, quality: 30}]
+
+  - id: blur_r1
+    category: single
+    pipeline: [{name: gaussian_blur, radius: 1.0}]
+  - id: blur_r3
+    category: single
+    pipeline: [{name: gaussian_blur, radius: 3.0}]
+  - id: blur_r8
+    category: single
+    pipeline: [{name: gaussian_blur, radius: 8.0}]
+
+  - id: noise_s001
+    category: single
+    pipeline: [{name: gaussian_noise, sigma: 0.01}]
+  - id: noise_s003
+    category: single
+    pipeline: [{name: gaussian_noise, sigma: 0.03}]
+  - id: noise_s005
+    category: single
+    pipeline: [{name: gaussian_noise, sigma: 0.05}]
+
+  - id: brightness_07
+    category: single
+    pipeline: [{name: brightness, factor: 0.7}]
+  - id: brightness_15
+    category: single
+    pipeline: [{name: brightness, factor: 1.5}]
+  - id: brightness_20
+    category: single
+    pipeline: [{name: brightness, factor: 2.0}]
+  - id: contrast_07
+    category: single
+    pipeline: [{name: contrast, factor: 0.7}]
+  - id: contrast_15
+    category: single
+    pipeline: [{name: contrast, factor: 1.5}]
+  - id: contrast_20
+    category: single
+    pipeline: [{name: contrast, factor: 2.0}]
+
+  - id: resize_05
+    category: single
+    pipeline: [{name: resize_roundtrip, scale: 0.5}]
+  - id: resize_075
+    category: single
+    pipeline: [{name: resize_roundtrip, scale: 0.75}]
+  - id: resize_15
+    category: single
+    pipeline: [{name: resize_roundtrip, scale: 1.5}]
+  - id: crop_075
+    category: single
+    pipeline: [{name: crop_resize, keep_ratio: 0.75}]
+  - id: crop_05
+    category: single
+    pipeline: [{name: crop_resize, keep_ratio: 0.5}]
+  - id: horizontal_flip
+    category: single
+    pipeline: [{name: horizontal_flip}]
+  - id: rotation_3
+    category: single
+    pipeline: [{name: rotation, angle: 3.0}]
+  - id: rotation_10
+    category: single
+    pipeline: [{name: rotation, angle: 10.0}]
+  - id: perspective_light
+    category: single
+    pipeline: [{name: perspective, magnitude: 0.03}]
+  - id: perspective_heavy
+    category: single
+    pipeline: [{name: perspective, magnitude: 0.10}]
+
+  - id: local_splice_10
+    category: single
+    pipeline: [{name: local_splice, mask_ratio: 0.10}]
+  - id: local_splice_30
+    category: single
+    pipeline: [{name: local_splice, mask_ratio: 0.30}]
+  - id: local_splice_50
+    category: single
+    pipeline: [{name: local_splice, mask_ratio: 0.50}]
+  - id: copy_move_10
+    category: single
+    pipeline: [{name: copy_move, mask_ratio: 0.10}]
+  - id: copy_move_30
+    category: single
+    pipeline: [{name: copy_move, mask_ratio: 0.30}]
+  - id: copy_move_50
+    category: single
+    pipeline: [{name: copy_move, mask_ratio: 0.50}]
+  - id: local_inpaint_10
+    category: single
+    pipeline: [{name: local_inpaint, mask_ratio: 0.10}]
+  - id: local_inpaint_30
+    category: single
+    pipeline: [{name: local_inpaint, mask_ratio: 0.30}]
+  - id: local_inpaint_50
+    category: single
+    pipeline: [{name: local_inpaint, mask_ratio: 0.50}]
+
+  - id: jpeg80_brightness15_crop50
+    category: compound
+    pipeline:
+      - {name: jpeg, quality: 80}
+      - {name: brightness, factor: 1.5}
+      - {name: crop_resize, keep_ratio: 0.5}
+  - id: jpeg50_resize50_noise001
+    category: compound
+    pipeline:
+      - {name: jpeg, quality: 50}
+      - {name: resize_roundtrip, scale: 0.5}
+      - {name: gaussian_noise, sigma: 0.01}
+  - id: blur1_contrast15_jpeg80
+    category: compound
+    pipeline:
+      - {name: gaussian_blur, radius: 1.0}
+      - {name: contrast, factor: 1.5}
+      - {name: jpeg, quality: 80}
+  - id: crop75_resize75_jpeg80
+    category: compound
+    pipeline:
+      - {name: crop_resize, keep_ratio: 0.75}
+      - {name: resize_roundtrip, scale: 0.75}
+      - {name: jpeg, quality: 80}
+  - id: flip_contrast15_jpeg80
+    category: compound
+    pipeline:
+      - {name: horizontal_flip}
+      - {name: contrast, factor: 1.5}
+      - {name: jpeg, quality: 80}
+  - id: rotation3_resize75_jpeg80
+    category: compound
+    pipeline:
+      - {name: rotation, angle: 3.0}
+      - {name: resize_roundtrip, scale: 0.75}
+      - {name: jpeg, quality: 80}
+  - id: local_splice30_jpeg80
+    category: compound
+    pipeline:
+      - {name: local_splice, mask_ratio: 0.30}
+      - {name: jpeg, quality: 80}
+  - id: local_inpaint30_jpeg50
+    category: compound
+    pipeline:
+      - {name: local_inpaint, mask_ratio: 0.30}
+      - {name: jpeg, quality: 50}

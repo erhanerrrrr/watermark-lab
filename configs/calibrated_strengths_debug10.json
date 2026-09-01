@@ -1,0 +1,953 @@
+{
+  "suite_id": "m2-debug10-v1",
+  "created_at": "2026-09-01T17:41:55.787420+08:00",
+  "target_psnr_db": 40.0,
+  "seed": 42,
+  "image_count": 40,
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10",
+    "numpy": "1.26.4",
+    "torch": "2.5.1+cpu",
+    "trustmark": "0.9.0",
+    "opencv-python": "4.10.0.84"
+  },
+  "models": {
+    "dwt_dct": {
+      "search_bounds": {
+        "minimum_strength": 20.0,
+        "maximum_strength": 600.0
+      },
+      "datasets": {
+        "coco2017_val_debug10": {
+          "selected": {
+            "strength": 115.15625,
+            "mean_psnr_db": 40.13340265267591,
+            "std_psnr_db": 0.9688715760956754,
+            "minimum_psnr_db": 37.920776508867846,
+            "maximum_psnr_db": 41.499231538934744
+          },
+          "target_error_db": 0.13340265267591178,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 20.0,
+              "mean_psnr_db": 49.23349269897283,
+              "std_psnr_db": 2.377202698301085,
+              "minimum_psnr_db": 45.47737086788701,
+              "maximum_psnr_db": 54.03281271432023
+            },
+            {
+              "strength": 600.0,
+              "mean_psnr_db": 26.8288997539773,
+              "std_psnr_db": 0.9754752776493637,
+              "minimum_psnr_db": 24.799948243640337,
+              "maximum_psnr_db": 28.345809054542613
+            },
+            {
+              "strength": 310.0,
+              "mean_psnr_db": 32.202407871953255,
+              "std_psnr_db": 0.9646746567864447,
+              "minimum_psnr_db": 30.201183674721985,
+              "maximum_psnr_db": 33.696139698784144
+            },
+            {
+              "strength": 165.0,
+              "mean_psnr_db": 37.3468371396549,
+              "std_psnr_db": 0.9532814903860296,
+              "minimum_psnr_db": 35.259121976944655,
+              "maximum_psnr_db": 38.79993526079832
+            },
+            {
+              "strength": 92.5,
+              "mean_psnr_db": 41.715772815462614,
+              "std_psnr_db": 1.0167225625937955,
+              "minimum_psnr_db": 39.37617287570677,
+              "maximum_psnr_db": 43.004101632090425
+            },
+            {
+              "strength": 128.75,
+              "mean_psnr_db": 39.28366194967487,
+              "std_psnr_db": 0.9607193337311591,
+              "minimum_psnr_db": 37.112675063680875,
+              "maximum_psnr_db": 40.67544168939801
+            },
+            {
+              "strength": 110.625,
+              "mean_psnr_db": 40.408491011074034,
+              "std_psnr_db": 0.9832145265370942,
+              "minimum_psnr_db": 38.181688716739565,
+              "maximum_psnr_db": 41.786888949420025
+            },
+            {
+              "strength": 119.6875,
+              "mean_psnr_db": 39.8469132646351,
+              "std_psnr_db": 0.9689163425651627,
+              "minimum_psnr_db": 37.640783672531846,
+              "maximum_psnr_db": 41.21510879046643
+            },
+            {
+              "strength": 115.15625,
+              "mean_psnr_db": 40.13340265267591,
+              "std_psnr_db": 0.9688715760956754,
+              "minimum_psnr_db": 37.920776508867846,
+              "maximum_psnr_db": 41.499231538934744
+            }
+          ]
+        },
+        "div2k_valid_hr_debug10": {
+          "selected": {
+            "strength": 396.09375,
+            "mean_psnr_db": 40.01761763878116,
+            "std_psnr_db": 0.4206744199321813,
+            "minimum_psnr_db": 39.28357487128289,
+            "maximum_psnr_db": 40.53983344967361
+          },
+          "target_error_db": 0.01761763878116085,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 20.0,
+              "mean_psnr_db": 59.26415714356481,
+              "std_psnr_db": 2.240307610947976,
+              "minimum_psnr_db": 55.50936672375089,
+              "maximum_psnr_db": 63.51106781576193
+            },
+            {
+              "strength": 600.0,
+              "mean_psnr_db": 36.5659144383355,
+              "std_psnr_db": 0.3979750116806718,
+              "minimum_psnr_db": 35.92387783488639,
+              "maximum_psnr_db": 37.10301579159719
+            },
+            {
+              "strength": 310.0,
+              "mean_psnr_db": 42.049611985749344,
+              "std_psnr_db": 0.4304753824419903,
+              "minimum_psnr_db": 41.265001529647165,
+              "maximum_psnr_db": 42.55937469080056
+            },
+            {
+              "strength": 455.0,
+              "mean_psnr_db": 38.857987387176394,
+              "std_psnr_db": 0.4099685159310515,
+              "minimum_psnr_db": 38.161869359667996,
+              "maximum_psnr_db": 39.3852975311616
+            },
+            {
+              "strength": 382.5,
+              "mean_psnr_db": 40.305308422898335,
+              "std_psnr_db": 0.42023856541099414,
+              "minimum_psnr_db": 39.571428731742074,
+              "maximum_psnr_db": 40.82879470331099
+            },
+            {
+              "strength": 418.75,
+              "mean_psnr_db": 39.55219096957444,
+              "std_psnr_db": 0.41695400345719286,
+              "minimum_psnr_db": 38.83179888481876,
+              "maximum_psnr_db": 40.07405789592811
+            },
+            {
+              "strength": 400.625,
+              "mean_psnr_db": 39.92164849381798,
+              "std_psnr_db": 0.41928744122361916,
+              "minimum_psnr_db": 39.19370977649644,
+              "maximum_psnr_db": 40.445047727293534
+            },
+            {
+              "strength": 391.5625,
+              "mean_psnr_db": 40.11952571318314,
+              "std_psnr_db": 0.42126124926363384,
+              "minimum_psnr_db": 39.381787100112746,
+              "maximum_psnr_db": 40.63848551746298
+            },
+            {
+              "strength": 396.09375,
+              "mean_psnr_db": 40.01761763878116,
+              "std_psnr_db": 0.4206744199321813,
+              "minimum_psnr_db": 39.28357487128289,
+              "maximum_psnr_db": 40.53983344967361
+            }
+          ]
+        },
+        "diffusiondb_2m_debug10": {
+          "selected": {
+            "strength": 133.28125,
+            "mean_psnr_db": 40.082193361897545,
+            "std_psnr_db": 1.3991067318517394,
+            "minimum_psnr_db": 38.47564147560853,
+            "maximum_psnr_db": 43.24724271244409
+          },
+          "target_error_db": 0.082193361897545,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 20.0,
+              "mean_psnr_db": 51.37207755665743,
+              "std_psnr_db": 2.892041051511337,
+              "minimum_psnr_db": 47.28816846323474,
+              "maximum_psnr_db": 56.92366563207167
+            },
+            {
+              "strength": 600.0,
+              "mean_psnr_db": 27.64398132898055,
+              "std_psnr_db": 1.3690779954715069,
+              "minimum_psnr_db": 25.989370475646734,
+              "maximum_psnr_db": 30.618863366450206
+            },
+            {
+              "strength": 310.0,
+              "mean_psnr_db": 33.13024534237128,
+              "std_psnr_db": 1.3277427381979285,
+              "minimum_psnr_db": 31.637945522189458,
+              "maximum_psnr_db": 36.09275102213304
+            },
+            {
+              "strength": 165.0,
+              "mean_psnr_db": 38.361780360277784,
+              "std_psnr_db": 1.3584312684913096,
+              "minimum_psnr_db": 36.84318637727594,
+              "maximum_psnr_db": 41.4181721725644
+            },
+            {
+              "strength": 92.5,
+              "mean_psnr_db": 42.8894623190607,
+              "std_psnr_db": 1.5085130735728973,
+              "minimum_psnr_db": 41.04120801579726,
+              "maximum_psnr_db": 46.31886998932175
+            },
+            {
+              "strength": 128.75,
+              "mean_psnr_db": 40.35258113869342,
+              "std_psnr_db": 1.404719398100065,
+              "minimum_psnr_db": 38.72813088549844,
+              "maximum_psnr_db": 43.53184536213177
+            },
+            {
+              "strength": 146.875,
+              "mean_psnr_db": 39.30935298787659,
+              "std_psnr_db": 1.3805044979881778,
+              "minimum_psnr_db": 37.73527544680174,
+              "maximum_psnr_db": 42.42801434562481
+            },
+            {
+              "strength": 137.8125,
+              "mean_psnr_db": 39.81838315894214,
+              "std_psnr_db": 1.391941997545747,
+              "minimum_psnr_db": 38.22123080892375,
+              "maximum_psnr_db": 42.96995280894222
+            },
+            {
+              "strength": 133.28125,
+              "mean_psnr_db": 40.082193361897545,
+              "std_psnr_db": 1.3991067318517394,
+              "minimum_psnr_db": 38.47564147560853,
+              "maximum_psnr_db": 43.24724271244409
+            }
+          ]
+        },
+        "w_bench_det_inversion_debug10": {
+          "selected": {
+            "strength": 115.15625,
+            "mean_psnr_db": 39.91442332189007,
+            "std_psnr_db": 0.33967866964595006,
+            "minimum_psnr_db": 39.31149294235996,
+            "maximum_psnr_db": 40.24674205675596
+          },
+          "target_error_db": 0.08557667810993053,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 20.0,
+              "mean_psnr_db": 50.81763253325914,
+              "std_psnr_db": 1.9383225127516703,
+              "minimum_psnr_db": 47.05690072489368,
+              "maximum_psnr_db": 53.118729510054266
+            },
+            {
+              "strength": 600.0,
+              "mean_psnr_db": 26.108710406396096,
+              "std_psnr_db": 0.16950787224698788,
+              "minimum_psnr_db": 25.90817272310419,
+              "maximum_psnr_db": 26.445938577237165
+            },
+            {
+              "strength": 310.0,
+              "mean_psnr_db": 31.629395756971462,
+              "std_psnr_db": 0.08353024936754548,
+              "minimum_psnr_db": 31.452810756894017,
+              "maximum_psnr_db": 31.741786857932006
+            },
+            {
+              "strength": 165.0,
+              "mean_psnr_db": 36.958535182744484,
+              "std_psnr_db": 0.19602429447198075,
+              "minimum_psnr_db": 36.57393530067661,
+              "maximum_psnr_db": 37.16938455241888
+            },
+            {
+              "strength": 92.5,
+              "mean_psnr_db": 41.636335209160464,
+              "std_psnr_db": 0.4506779417128573,
+              "minimum_psnr_db": 40.79784003012264,
+              "maximum_psnr_db": 42.062980293929954
+            },
+            {
+              "strength": 128.75,
+              "mean_psnr_db": 39.001740011593014,
+              "std_psnr_db": 0.2834744724051559,
+              "minimum_psnr_db": 38.483803492470166,
+              "maximum_psnr_db": 39.28886133907905
+            },
+            {
+              "strength": 110.625,
+              "mean_psnr_db": 40.20430067088343,
+              "std_psnr_db": 0.34126933412030314,
+              "minimum_psnr_db": 39.598499807491045,
+              "maximum_psnr_db": 40.56215171728062
+            },
+            {
+              "strength": 119.6875,
+              "mean_psnr_db": 39.6097522386238,
+              "std_psnr_db": 0.31848781605042165,
+              "minimum_psnr_db": 39.04199836253623,
+              "maximum_psnr_db": 39.92501567886532
+            },
+            {
+              "strength": 115.15625,
+              "mean_psnr_db": 39.91442332189007,
+              "std_psnr_db": 0.33967866964595006,
+              "minimum_psnr_db": 39.31149294235996,
+              "maximum_psnr_db": 40.24674205675596
+            }
+          ]
+        }
+      }
+    },
+    "trustmark_q": {
+      "search_bounds": {
+        "minimum_strength": 0.5,
+        "maximum_strength": 4.0
+      },
+      "datasets": {
+        "coco2017_val_debug10": {
+          "selected": {
+            "strength": 1.3203125,
+            "mean_psnr_db": 39.92832066924925,
+            "std_psnr_db": 2.1871711609475413,
+            "minimum_psnr_db": 36.57105711864024,
+            "maximum_psnr_db": 43.22497900662772
+          },
+          "target_error_db": 0.07167933075074728,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.5,
+              "mean_psnr_db": 46.93448165168154,
+              "std_psnr_db": 1.551733529324855,
+              "minimum_psnr_db": 44.37305571101212,
+              "maximum_psnr_db": 49.15620908835046
+            },
+            {
+              "strength": 4.0,
+              "mean_psnr_db": 30.597663441930024,
+              "std_psnr_db": 2.279960502166343,
+              "minimum_psnr_db": 27.17956248167691,
+              "maximum_psnr_db": 34.082768477636144
+            },
+            {
+              "strength": 2.25,
+              "mean_psnr_db": 35.48894086160798,
+              "std_psnr_db": 2.268532026511193,
+              "minimum_psnr_db": 32.0447906286072,
+              "maximum_psnr_db": 38.940823619825785
+            },
+            {
+              "strength": 1.375,
+              "mean_psnr_db": 39.59750754591149,
+              "std_psnr_db": 2.196746108973412,
+              "minimum_psnr_db": 36.226912570596085,
+              "maximum_psnr_db": 42.90770302803725
+            },
+            {
+              "strength": 0.9375,
+              "mean_psnr_db": 42.64059274778388,
+              "std_psnr_db": 2.0616565118233576,
+              "minimum_psnr_db": 39.431917284109105,
+              "maximum_psnr_db": 45.712997877485286
+            },
+            {
+              "strength": 1.15625,
+              "mean_psnr_db": 40.99855576106151,
+              "std_psnr_db": 2.1471202782073666,
+              "minimum_psnr_db": 37.686748652379556,
+              "maximum_psnr_db": 44.221452103922665
+            },
+            {
+              "strength": 1.265625,
+              "mean_psnr_db": 40.271862978834996,
+              "std_psnr_db": 2.1755167356499894,
+              "minimum_psnr_db": 36.92681467243852,
+              "maximum_psnr_db": 43.548540886005654
+            },
+            {
+              "strength": 1.3203125,
+              "mean_psnr_db": 39.92832066924925,
+              "std_psnr_db": 2.1871711609475413,
+              "minimum_psnr_db": 36.57105711864024,
+              "maximum_psnr_db": 43.22497900662772
+            },
+            {
+              "strength": 1.29296875,
+              "mean_psnr_db": 40.09903878662266,
+              "std_psnr_db": 2.1814935765574854,
+              "minimum_psnr_db": 36.745922164052715,
+              "maximum_psnr_db": 43.38563161456754
+            }
+          ]
+        },
+        "div2k_valid_hr_debug10": {
+          "selected": {
+            "strength": 1.07421875,
+            "mean_psnr_db": 39.97927710096151,
+            "std_psnr_db": 0.9483448056230037,
+            "minimum_psnr_db": 38.85732373606758,
+            "maximum_psnr_db": 41.4802550592147
+          },
+          "target_error_db": 0.020722899038489118,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.5,
+              "mean_psnr_db": 45.76831859022166,
+              "std_psnr_db": 0.756426016623153,
+              "minimum_psnr_db": 44.849495050764546,
+              "maximum_psnr_db": 47.02968628330134
+            },
+            {
+              "strength": 4.0,
+              "mean_psnr_db": 28.86305980680505,
+              "std_psnr_db": 0.9605516108354745,
+              "minimum_psnr_db": 27.66264380010955,
+              "maximum_psnr_db": 30.406817536153863
+            },
+            {
+              "strength": 2.25,
+              "mean_psnr_db": 33.76956144464003,
+              "std_psnr_db": 0.9778648635162261,
+              "minimum_psnr_db": 32.580517608063815,
+              "maximum_psnr_db": 35.325584549863414
+            },
+            {
+              "strength": 1.375,
+              "mean_psnr_db": 37.9349032698491,
+              "std_psnr_db": 0.9678850817600252,
+              "minimum_psnr_db": 36.78427187624819,
+              "maximum_psnr_db": 39.46651170193947
+            },
+            {
+              "strength": 0.9375,
+              "mean_psnr_db": 41.08358796702472,
+              "std_psnr_db": 0.9299112289847195,
+              "minimum_psnr_db": 39.982875239046066,
+              "maximum_psnr_db": 42.557357876992874
+            },
+            {
+              "strength": 1.15625,
+              "mean_psnr_db": 39.375033847588476,
+              "std_psnr_db": 0.9552741960661995,
+              "minimum_psnr_db": 38.243383882284704,
+              "maximum_psnr_db": 40.885372848788855
+            },
+            {
+              "strength": 1.046875,
+              "mean_psnr_db": 40.19034457009799,
+              "std_psnr_db": 0.9455033907147863,
+              "minimum_psnr_db": 39.0714422237216,
+              "maximum_psnr_db": 41.68762654042591
+            },
+            {
+              "strength": 1.1015625,
+              "mean_psnr_db": 39.77319027937679,
+              "std_psnr_db": 0.9505710636909643,
+              "minimum_psnr_db": 38.64814853790678,
+              "maximum_psnr_db": 41.27742264101173
+            },
+            {
+              "strength": 1.07421875,
+              "mean_psnr_db": 39.97927710096151,
+              "std_psnr_db": 0.9483448056230037,
+              "minimum_psnr_db": 38.85732373606758,
+              "maximum_psnr_db": 41.4802550592147
+            }
+          ]
+        },
+        "diffusiondb_2m_debug10": {
+          "selected": {
+            "strength": 1.45703125,
+            "mean_psnr_db": 39.93370891002295,
+            "std_psnr_db": 1.8240403142931823,
+            "minimum_psnr_db": 35.79930821120338,
+            "maximum_psnr_db": 42.21552399661759
+          },
+          "target_error_db": 0.06629108997704947,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.5,
+              "mean_psnr_db": 47.532465489165574,
+              "std_psnr_db": 1.3263727667211231,
+              "minimum_psnr_db": 44.38152829761787,
+              "maximum_psnr_db": 49.12171961574196
+            },
+            {
+              "strength": 4.0,
+              "mean_psnr_db": 31.451502848958626,
+              "std_psnr_db": 1.8275581602531208,
+              "minimum_psnr_db": 27.413432830046823,
+              "maximum_psnr_db": 33.792312472679676
+            },
+            {
+              "strength": 2.25,
+              "mean_psnr_db": 36.32287428376911,
+              "std_psnr_db": 1.8579436609213824,
+              "minimum_psnr_db": 32.16095406729445,
+              "maximum_psnr_db": 38.67444149349449
+            },
+            {
+              "strength": 1.375,
+              "mean_psnr_db": 40.40526742696453,
+              "std_psnr_db": 1.8148565506268042,
+              "minimum_psnr_db": 36.286231187367356,
+              "maximum_psnr_db": 42.67234655667959
+            },
+            {
+              "strength": 1.8125,
+              "mean_psnr_db": 38.133069789192774,
+              "std_psnr_db": 1.8488741278079488,
+              "minimum_psnr_db": 33.96566763169841,
+              "maximum_psnr_db": 40.45831109180152
+            },
+            {
+              "strength": 1.59375,
+              "mean_psnr_db": 39.198111531495435,
+              "std_psnr_db": 1.8361370574751534,
+              "minimum_psnr_db": 35.0464365017713,
+              "maximum_psnr_db": 41.50289780544423
+            },
+            {
+              "strength": 1.484375,
+              "mean_psnr_db": 39.78157818195638,
+              "std_psnr_db": 1.8267219339172995,
+              "minimum_psnr_db": 35.643314900200735,
+              "maximum_psnr_db": 42.06766506337249
+            },
+            {
+              "strength": 1.4296875,
+              "mean_psnr_db": 40.08806552902114,
+              "std_psnr_db": 1.8210894995754332,
+              "minimum_psnr_db": 35.95905409428252,
+              "maximum_psnr_db": 42.36525043516117
+            },
+            {
+              "strength": 1.45703125,
+              "mean_psnr_db": 39.93370891002295,
+              "std_psnr_db": 1.8240403142931823,
+              "minimum_psnr_db": 35.79930821120338,
+              "maximum_psnr_db": 42.21552399661759
+            }
+          ]
+        },
+        "w_bench_det_inversion_debug10": {
+          "selected": {
+            "strength": 1.51171875,
+            "mean_psnr_db": 40.05697507140748,
+            "std_psnr_db": 1.5818641514308602,
+            "minimum_psnr_db": 36.15998126317891,
+            "maximum_psnr_db": 42.087005666805666
+          },
+          "target_error_db": 0.056975071407478595,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.5,
+              "mean_psnr_db": 47.83414034834051,
+              "std_psnr_db": 1.1153590940175615,
+              "minimum_psnr_db": 44.99597171841525,
+              "maximum_psnr_db": 49.1455334818979
+            },
+            {
+              "strength": 4.0,
+              "mean_psnr_db": 31.854568294984993,
+              "std_psnr_db": 1.647865711903399,
+              "minimum_psnr_db": 27.827317623137073,
+              "maximum_psnr_db": 33.97279853672323
+            },
+            {
+              "strength": 2.25,
+              "mean_psnr_db": 36.74928925314897,
+              "std_psnr_db": 1.6274231925655243,
+              "minimum_psnr_db": 32.75846050946317,
+              "maximum_psnr_db": 38.84824697078356
+            },
+            {
+              "strength": 1.375,
+              "mean_psnr_db": 40.824564140738616,
+              "std_psnr_db": 1.5646752937592163,
+              "minimum_psnr_db": 36.9609080434486,
+              "maximum_psnr_db": 42.82341059794735
+            },
+            {
+              "strength": 1.8125,
+              "mean_psnr_db": 38.5613283467243,
+              "std_psnr_db": 1.606343472859853,
+              "minimum_psnr_db": 34.6124635630226,
+              "maximum_psnr_db": 40.62781253285429
+            },
+            {
+              "strength": 1.59375,
+              "mean_psnr_db": 39.62328254434485,
+              "std_psnr_db": 1.5895700158058648,
+              "minimum_psnr_db": 35.709293162584935,
+              "maximum_psnr_db": 41.66433963829361
+            },
+            {
+              "strength": 1.484375,
+              "mean_psnr_db": 40.20534814331865,
+              "std_psnr_db": 1.5789244993545333,
+              "minimum_psnr_db": 36.313508460210414,
+              "maximum_psnr_db": 42.22997545362012
+            },
+            {
+              "strength": 1.5390625,
+              "mean_psnr_db": 39.909943275773195,
+              "std_psnr_db": 1.5851604902195013,
+              "minimum_psnr_db": 36.005634585171066,
+              "maximum_psnr_db": 41.94526207113501
+            },
+            {
+              "strength": 1.51171875,
+              "mean_psnr_db": 40.05697507140748,
+              "std_psnr_db": 1.5818641514308602,
+              "minimum_psnr_db": 36.15998126317891,
+              "maximum_psnr_db": 42.087005666805666
+            }
+          ]
+        }
+      }
+    },
+    "wam": {
+      "search_bounds": {
+        "minimum_strength": 0.25,
+        "maximum_strength": 8.0
+      },
+      "datasets": {
+        "coco2017_val_debug10": {
+          "selected": {
+            "strength": 1.58203125,
+            "mean_psnr_db": 40.088255607853334,
+            "std_psnr_db": 1.5818000598296702,
+            "minimum_psnr_db": 38.33182333131924,
+            "maximum_psnr_db": 42.66981772711703
+          },
+          "target_error_db": 0.08825560785333408,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.25,
+              "mean_psnr_db": 55.71696812926164,
+              "std_psnr_db": 2.047246973910905,
+              "minimum_psnr_db": 53.51725544217459,
+              "maximum_psnr_db": 58.85276167092264
+            },
+            {
+              "strength": 8.0,
+              "mean_psnr_db": 26.285930751501162,
+              "std_psnr_db": 1.5628603802180037,
+              "minimum_psnr_db": 24.56803498740596,
+              "maximum_psnr_db": 28.95835953841249
+            },
+            {
+              "strength": 4.125,
+              "mean_psnr_db": 31.90196973510581,
+              "std_psnr_db": 1.5897978243642699,
+              "minimum_psnr_db": 30.156033540936864,
+              "maximum_psnr_db": 34.57337998021878
+            },
+            {
+              "strength": 2.1875,
+              "mean_psnr_db": 37.3263732653612,
+              "std_psnr_db": 1.5969982151713913,
+              "minimum_psnr_db": 35.557228164132646,
+              "maximum_psnr_db": 39.96005028886159
+            },
+            {
+              "strength": 1.21875,
+              "mean_psnr_db": 42.31400970678672,
+              "std_psnr_db": 1.6051639155941237,
+              "minimum_psnr_db": 40.51641412682634,
+              "maximum_psnr_db": 44.898851350421644
+            },
+            {
+              "strength": 1.703125,
+              "mean_psnr_db": 39.46573293444228,
+              "std_psnr_db": 1.590980606205966,
+              "minimum_psnr_db": 37.69976446734135,
+              "maximum_psnr_db": 42.06540459986019
+            },
+            {
+              "strength": 1.4609375,
+              "mean_psnr_db": 40.765298264750584,
+              "std_psnr_db": 1.5781047153795706,
+              "minimum_psnr_db": 39.00913226351713,
+              "maximum_psnr_db": 43.317853708860625
+            },
+            {
+              "strength": 1.58203125,
+              "mean_psnr_db": 40.088255607853334,
+              "std_psnr_db": 1.5818000598296702,
+              "minimum_psnr_db": 38.33182333131924,
+              "maximum_psnr_db": 42.66981772711703
+            },
+            {
+              "strength": 1.642578125,
+              "mean_psnr_db": 39.77310471373229,
+              "std_psnr_db": 1.5873147366311418,
+              "minimum_psnr_db": 38.01155574796298,
+              "maximum_psnr_db": 42.35826066400489
+            }
+          ]
+        },
+        "div2k_valid_hr_debug10": {
+          "selected": {
+            "strength": 1.82421875,
+            "mean_psnr_db": 39.910169832293235,
+            "std_psnr_db": 1.742156100206189,
+            "minimum_psnr_db": 36.70599465546925,
+            "maximum_psnr_db": 43.93685814322283
+          },
+          "target_error_db": 0.089830167706765,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.25,
+              "mean_psnr_db": 56.87203536021176,
+              "std_psnr_db": 2.417361123585841,
+              "minimum_psnr_db": 52.859290532031686,
+              "maximum_psnr_db": 62.991921491822
+            },
+            {
+              "strength": 8.0,
+              "mean_psnr_db": 27.339577065458702,
+              "std_psnr_db": 1.8089012082919005,
+              "minimum_psnr_db": 24.222211548684687,
+              "maximum_psnr_db": 31.411746448963335
+            },
+            {
+              "strength": 4.125,
+              "mean_psnr_db": 32.97356121629103,
+              "std_psnr_db": 1.7967858716738077,
+              "minimum_psnr_db": 29.789143023565153,
+              "maximum_psnr_db": 37.07966731073435
+            },
+            {
+              "strength": 2.1875,
+              "mean_psnr_db": 38.389339839763025,
+              "std_psnr_db": 1.7814186089803858,
+              "minimum_psnr_db": 35.16815405985906,
+              "maximum_psnr_db": 42.51989179408512
+            },
+            {
+              "strength": 1.21875,
+              "mean_psnr_db": 43.280556331314905,
+              "std_psnr_db": 1.6936061259963668,
+              "minimum_psnr_db": 40.112616869413564,
+              "maximum_psnr_db": 47.195818489742045
+            },
+            {
+              "strength": 1.703125,
+              "mean_psnr_db": 40.488793430609014,
+              "std_psnr_db": 1.7324141450943655,
+              "minimum_psnr_db": 37.2872259558278,
+              "maximum_psnr_db": 44.48983675897306
+            },
+            {
+              "strength": 1.9453125,
+              "mean_psnr_db": 39.37259371983204,
+              "std_psnr_db": 1.7535180388794471,
+              "minimum_psnr_db": 36.16215279243326,
+              "maximum_psnr_db": 43.42477328466752
+            },
+            {
+              "strength": 1.82421875,
+              "mean_psnr_db": 39.910169832293235,
+              "std_psnr_db": 1.742156100206189,
+              "minimum_psnr_db": 36.70599465546925,
+              "maximum_psnr_db": 43.93685814322283
+            },
+            {
+              "strength": 1.763671875,
+              "mean_psnr_db": 40.19544107614334,
+              "std_psnr_db": 1.7379942203086447,
+              "minimum_psnr_db": 36.99145254766522,
+              "maximum_psnr_db": 44.209467278150136
+            }
+          ]
+        },
+        "diffusiondb_2m_debug10": {
+          "selected": {
+            "strength": 1.763671875,
+            "mean_psnr_db": 40.13777917772157,
+            "std_psnr_db": 1.3550693650083734,
+            "minimum_psnr_db": 38.1986385733846,
+            "maximum_psnr_db": 42.209079422733076
+          },
+          "target_error_db": 0.1377791777215691,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.25,
+              "mean_psnr_db": 57.032482511357045,
+              "std_psnr_db": 1.9506538829160336,
+              "minimum_psnr_db": 54.457165142898944,
+              "maximum_psnr_db": 60.31168274126571
+            },
+            {
+              "strength": 8.0,
+              "mean_psnr_db": 27.234269991442403,
+              "std_psnr_db": 1.308406742339295,
+              "minimum_psnr_db": 25.38464721870283,
+              "maximum_psnr_db": 29.19449874018305
+            },
+            {
+              "strength": 4.125,
+              "mean_psnr_db": 32.87316919430435,
+              "std_psnr_db": 1.350021301260196,
+              "minimum_psnr_db": 30.940129806792726,
+              "maximum_psnr_db": 34.916180862442715
+            },
+            {
+              "strength": 2.1875,
+              "mean_psnr_db": 38.313306758400145,
+              "std_psnr_db": 1.3632036663463434,
+              "minimum_psnr_db": 36.35693874329557,
+              "maximum_psnr_db": 40.38144604665707
+            },
+            {
+              "strength": 1.21875,
+              "mean_psnr_db": 43.25150450445083,
+              "std_psnr_db": 1.331207958001696,
+              "minimum_psnr_db": 41.35030144132914,
+              "maximum_psnr_db": 45.26064675519683
+            },
+            {
+              "strength": 1.703125,
+              "mean_psnr_db": 40.43438330902458,
+              "std_psnr_db": 1.354663663019033,
+              "minimum_psnr_db": 38.49720810002419,
+              "maximum_psnr_db": 42.49720892614551
+            },
+            {
+              "strength": 1.9453125,
+              "mean_psnr_db": 39.3053802253736,
+              "std_psnr_db": 1.356771607582931,
+              "minimum_psnr_db": 37.3617900415681,
+              "maximum_psnr_db": 41.38168338192786
+            },
+            {
+              "strength": 1.82421875,
+              "mean_psnr_db": 39.85123132060346,
+              "std_psnr_db": 1.3555858496369402,
+              "minimum_psnr_db": 37.909649804928854,
+              "maximum_psnr_db": 41.92818970838385
+            },
+            {
+              "strength": 1.763671875,
+              "mean_psnr_db": 40.13777917772157,
+              "std_psnr_db": 1.3550693650083734,
+              "minimum_psnr_db": 38.1986385733846,
+              "maximum_psnr_db": 42.209079422733076
+            }
+          ]
+        },
+        "w_bench_det_inversion_debug10": {
+          "selected": {
+            "strength": 2.1875,
+            "mean_psnr_db": 39.91132721942129,
+            "std_psnr_db": 1.2601032926279665,
+            "minimum_psnr_db": 37.73271354589855,
+            "maximum_psnr_db": 41.80623233452334
+          },
+          "target_error_db": 0.08867278057871175,
+          "target_bracketed": true,
+          "evaluations": [
+            {
+              "strength": 0.25,
+              "mean_psnr_db": 58.928320640341084,
+              "std_psnr_db": 1.668807036401275,
+              "minimum_psnr_db": 56.10787000521549,
+              "maximum_psnr_db": 61.46841500494602
+            },
+            {
+              "strength": 8.0,
+              "mean_psnr_db": 28.702085551558138,
+              "std_psnr_db": 1.2700706612789285,
+              "minimum_psnr_db": 26.569398577158516,
+              "maximum_psnr_db": 30.653851172986766
+            },
+            {
+              "strength": 4.125,
+              "mean_psnr_db": 34.40966459145692,
+              "std_psnr_db": 1.2610993702973066,
+              "minimum_psnr_db": 32.2565246019388,
+              "maximum_psnr_db": 36.358076777308966
+            },
+            {
+              "strength": 2.1875,
+              "mean_psnr_db": 39.91132721942129,
+              "std_psnr_db": 1.2601032926279665,
+              "minimum_psnr_db": 37.73271354589855,
+              "maximum_psnr_db": 41.80623233452334
+            },
+            {
+              "strength": 1.21875,
+              "mean_psnr_db": 44.798103104228865,
+              "std_psnr_db": 1.197748487364595,
+              "minimum_psnr_db": 42.70519846489588,
+              "maximum_psnr_db": 46.71088389063074
+            },
+            {
+              "strength": 1.703125,
+              "mean_psnr_db": 41.954060683825006,
+              "std_psnr_db": 1.2262296505165518,
+              "minimum_psnr_db": 39.86917737115626,
+              "maximum_psnr_db": 43.88143529258113
+            },
+            {
+              "strength": 1.9453125,
+              "mean_psnr_db": 40.89301067152496,
+              "std_psnr_db": 1.2603436444543283,
+              "minimum_psnr_db": 38.73695340893939,
+              "maximum_psnr_db": 42.797361109079006
+            },
+            {
+              "strength": 2.06640625,
+              "mean_psnr_db": 40.399969049436244,
+              "std_psnr_db": 1.2616045277441468,
+              "minimum_psnr_db": 38.219722764147605,
+              "maximum_psnr_db": 42.28073446130053
+            },
+            {
+              "strength": 2.126953125,
+              "mean_psnr_db": 40.155753611839565,
+              "std_psnr_db": 1.2631057357745465,
+              "minimum_psnr_db": 37.97371043469252,
+              "maximum_psnr_db": 42.04027972937809
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+official:
+  repository: https://github.com/facebookresearch/watermark-anything
+  commit: 2c08af04d037d5667c02f6ddebbda9ff04581c3e
+  archived_repository: true
+  source_directory: third_party/wam-official
+  params: third_party/wam-official/checkpoints/params.json
+  checkpoint: checkpoints/wam/wam_mit.pth
+  checkpoint_url: https://dl.fbaipublicfiles.com/watermark_anything/wam_mit.pth
+  checkpoint_bytes: 377825938
+  checkpoint_sha256: 90ef232384e023bd63245eb0c131abd69d2afc7b8f17a71ccedceb542bf009e2
+  license: MIT
+
+inference:
+  message_bits: 32
+  input_size: 256
+  strength: 2.0
+  detection_threshold: 0.5
+  minimum_detected_fraction: 0.01
+  bit_logit_threshold: 0.5
+  pooling: official-semihard-positive-mask

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "watermark-lab"
+version = "0.1.0"
+description = "Reproducible image watermarking benchmark and AM-WAM research project"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "numpy>=1.26,<3",
+  "Pillow>=10,<13",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+trustmark = [
+  "numpy>=1.26,<2",
+  "trustmark==0.9.0",
+]
+wam = [
+  "numpy>=1.26,<2",
+  "torch==2.5.1",
+  "torchvision==0.20.1",
+  "omegaconf>=2.3,<3",
+  "einops>=0.8,<1",
+  "opencv-python==4.10.0.84",
+]
+research = [
+  "pandas>=2.1,<4",
+  "matplotlib>=3.8,<4",
+  "seaborn>=0.13,<1",
+  "scikit-image>=0.22,<1",
+  "scikit-learn>=1.4,<2",
+  "PyWavelets>=1.5,<2",
+]
+dev = [
+  "pytest>=8,<10",
+  "ruff>=0.6,<1",
+]
+
+[project.scripts]
+watermark-lab = "watermark_lab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["third_party"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

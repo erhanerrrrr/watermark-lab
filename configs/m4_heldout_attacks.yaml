@@ -1,0 +1,35 @@
+protocol:
+  id: wm-course-m4-heldout-v1
+  version: 1
+  seed: 4242
+  notes: >-
+    Continuous geometry values excluded from the synchronization candidate list.
+    Used only after all candidate angles and thresholds are frozen.
+
+cases:
+  - id: rotation_5_unseen
+    category: heldout
+    pipeline: [{name: rotation, angle: 5.0}]
+
+  - id: rotation_7_unseen
+    category: heldout
+    pipeline: [{name: rotation, angle: 7.0}]
+
+  - id: rotation_minus7_unseen
+    category: heldout
+    pipeline: [{name: rotation, angle: -7.0}]
+
+  - id: perspective_05_unseen
+    category: heldout
+    pipeline: [{name: perspective, magnitude: 0.05}]
+
+  - id: perspective_08_unseen
+    category: heldout
+    pipeline: [{name: perspective, magnitude: 0.08}]
+
+  - id: rotation7_resize80_jpeg70_unseen
+    category: heldout
+    pipeline:
+      - {name: rotation, angle: 7.0}
+      - {name: resize_roundtrip, scale: 0.80}
+      - {name: jpeg, quality: 70}

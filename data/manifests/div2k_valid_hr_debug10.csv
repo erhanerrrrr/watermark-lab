@@ -1,0 +1,11 @@
+﻿dataset,split,sample_id,relative_path,width,height,image_format,sha256
+div2k,valid_hr_debug10,0801.png,0801.png,2040,1356,PNG,ab5cf6a1cac2d1c2d0792dbd274fd2e53e42118ab6537771a825fd87aa28a60c
+div2k,valid_hr_debug10,0802.png,0802.png,2040,1356,PNG,4ad6f3ca8bf740192042978121f05ec493ddbe5a3da5584eaf0d9699c25ee431
+div2k,valid_hr_debug10,0803.png,0803.png,2040,1536,PNG,4b0148a9a1ff877ad9f76e65736a50cc36e10822b5d8ccd2abb2988ff4e1782b
+div2k,valid_hr_debug10,0804.png,0804.png,2040,1200,PNG,16b5fdbe808b868bed0be32f235208a1716d44e271a37b79cbc77ab53d2f6bdb
+div2k,valid_hr_debug10,0805.png,0805.png,2040,1536,PNG,e28d56feee10c2e2663f347dda574fff736894dba37341d37b91bac2ecd863b2
+div2k,valid_hr_debug10,0806.png,0806.png,2040,1356,PNG,36720ddd59f8b3eed28f8981e12e6e2d680bfa78b9d25f33ec4152013652c713
+div2k,valid_hr_debug10,0807.png,0807.png,2040,1128,PNG,4a2493d918862f703f783dc675bacbae5bd7698aa58f81ddb8bb71cf39ac173a
+div2k,valid_hr_debug10,0808.png,0808.png,2040,1356,PNG,956528ab3e0fadad1ed8ce93f93a30bf9f58c36ffa9dd775e2ad362ffdcf5ace
+div2k,valid_hr_debug10,0809.png,0809.png,2040,1356,PNG,a0b094da02bcaeabea1976fb939c87366d437bdda1a796fbc3f4700fb5e7bbed
+div2k,valid_hr_debug10,0810.png,0810.png,2040,1536,PNG,6940c660b97d2c5f1113101c3e6360d1d6886743c5796cad52224b8076b903f8

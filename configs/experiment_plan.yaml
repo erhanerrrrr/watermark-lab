@@ -1,0 +1,48 @@
+project:
+  name: am_wam_course_design
+  seed: 42
+  message_bits: 32
+  target_psnr_db: 40.0
+
+models:
+  core:
+    - dwt_dct
+    - trustmark_q
+    - wam
+    - am_wam
+  optional:
+    - hidden
+  smoke_test:
+    - lsb_reference
+
+datasets:
+  coco2017_val:
+    sample_count: 200
+    manifest: data/manifests/coco2017_val_200.csv
+  div2k_val:
+    sample_count: 100
+    manifest: data/manifests/div2k_val_100.csv
+  diffusiondb:
+    sample_count: 200
+    manifest: data/manifests/diffusiondb_200.csv
+  w_bench:
+    sample_count: 200
+    manifest: data/manifests/w_bench_200.csv
+
+attacks:
+  protocol: configs/attacks.yaml
+  protocol_id: wm-course-v1
+  categories: [control, single, compound]
+
+metrics:
+  image_quality: [psnr, ssim, lpips]
+  message: [bit_accuracy, ber, complete_recovery]
+  detection: [auc, tpr_at_fpr_1e_3]
+  localization: [precision, recall, f1, miou]
+  efficiency: [encode_ms, decode_ms, peak_memory_mb]
+
+evaluation:
+  bootstrap_samples: 1000
+  confidence_level: 0.95
+  save_examples_per_attack: 5
+  output_dir: results

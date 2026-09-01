@@ -1,0 +1,39 @@
+suite:
+  id: m4-geometry-adaptive-debug10-v1
+  seed: 42
+
+adaptive_strength:
+  target_psnr_db: 40.0
+  minimum_psnr_db: 38.0
+  minimum_strength: 0.25
+  maximum_strength: 8.0
+  psnr_tolerance_db: 0.15
+  quality_refinement_steps: 2
+  robustness_steps: 4
+  required_minimum_bit_margin: 0.20
+
+geometry_sync:
+  rotation_corrections: [-10.0, -6.0, -3.0, 3.0, 6.0, 10.0]
+  perspective_corrections: [0.03, 0.06, 0.10]
+  fusion_top_k: 3
+  score_temperature: 0.15
+  minimum_score_improvement: 0.006
+  minimum_border_evidence: 0.02
+  search_strategy: full
+
+focus_attacks:
+  - clean
+  - blur_r8
+  - rotation_3
+  - rotation_10
+  - perspective_light
+  - perspective_heavy
+  - rotation3_resize75_jpeg80
+
+inputs:
+  debug_suite: configs/debug_suite.yaml
+  calibration: configs/calibrated_strengths_debug10.json
+  attack_protocol: configs/attacks.yaml
+
+outputs:
+  results_dir: results/m4_ablation_v2

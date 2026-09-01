@@ -1,0 +1,36 @@
+suite:
+  id: m2-debug10-v1
+  seed: 42
+  target_psnr_db: 40.0
+
+datasets:
+  - id: coco2017_val_debug10
+    manifest: data/manifests/coco2017_val_debug10.csv
+    root: data/raw/debug10/coco2017_val
+  - id: div2k_valid_hr_debug10
+    manifest: data/manifests/div2k_valid_hr_debug10.csv
+    root: data/raw/debug10/div2k_valid_hr
+  - id: diffusiondb_2m_debug10
+    manifest: data/manifests/diffusiondb_2m_debug10.csv
+    root: data/raw/debug10/diffusiondb_2m
+  - id: w_bench_det_inversion_debug10
+    manifest: data/manifests/w_bench_det_inversion_debug10.csv
+    root: data/raw/debug10/w_bench_det_inversion
+
+models:
+  dwt_dct:
+    minimum_strength: 20.0
+    maximum_strength: 600.0
+  trustmark_q:
+    minimum_strength: 0.5
+    maximum_strength: 4.0
+  wam:
+    minimum_strength: 0.25
+    maximum_strength: 8.0
+
+attacks:
+  config: configs/attacks.yaml
+
+outputs:
+  calibration: configs/calibrated_strengths_debug10.json
+  results_dir: results/m2_debug
