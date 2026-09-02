@@ -1,181 +1,137 @@
 # 项目状态与新对话交接
 
-更新时间：2026-09-02。本文是面向共创者和后续 AI 对话的单一状态入口；研究总方针仍
-以根目录 `PROJECT_GUIDELINE.md` 为准，环境与完整复现命令以
-`docs/REPRODUCIBILITY.md` 为准。
+更新时间：2026-09-02。研究总方针以根目录 `PROJECT_GUIDELINE.md` 为准，完整环境、
+权重、数据与结果恢复命令以 `docs/REPRODUCIBILITY.md` 为准。
 
-## 1. 一句话状态
+## 1. 一句话现状
 
-项目已经完成 M1–M3 和 M4 第一阶段的可运行研究闭环：DWT-DCT、TrustMark-Q、WAM、
-AM-WAM 可在统一数据/攻击协议下比较；尚未完成 M4 多水印软聚类、正式大样本实验、
-后端 API、前端界面和最终交付包装。
+项目已完成 M1–M4.2：DWT-DCT、TrustMark-Q、WAM 和改进方法 AM-WAM 已在统一接口下
+运行；几何同步、内容自适应强度和多水印软聚类均已实现并有固定实验。formal-v1 已固定
+140 张 calibration、690 张独立 test 和 44 条攻击，四模型正式比较已完成 121,440 条。
+HTTP API、Web 前端、Windows 安装包、论文和答辩材料尚未完成。
 
-## 2. 当前前后端现状
+## 2. 前后端现状
 
-当前代码是“研究内核 + 命令行工具”，不是完整的前后端应用。
+当前是“研究内核 + CLI + 实验脚本”，不是完整前后端应用。
 
-| 层 | 当前状态 | 已有内容 | 缺口 |
+| 层 | 状态 | 已有内容 | 下一步 |
 |---|---|---|---|
-| 算法内核 | 可用 | 统一模型接口、4 个核心模型、攻击、指标 | M4 第二阶段仍待完成 |
-| 实验后端 | 可用 | manifest、实验运行器、CSV/JSON、分析脚本 | 缺少任务队列和持久任务状态 |
-| CLI | 可用 | 状态、自检、manifest、协议、批量实验 | 适合研发，不是最终用户界面 |
-| HTTP API | 未开始 | 无 | 需要 FastAPI 接口、校验、错误模型和任务管理 |
-| 前端 | 未开始 | 无 | 需要上传、嵌入/提取、攻击对比、图表与任务进度页 |
-| 桌面/安装包 | 未开始 | 无 | 可在 Web 版稳定后再做 Windows 打包 |
+| 算法内核 | 可用 | 统一模型接口、4 个研究模型、攻击与指标 | 继续做失败案例和论文消融 |
+| 实验后端 | 可用 | manifest、校准、可恢复运行器、统计与绘图 | 固化正式结果快照 |
+| CLI | 可用 | 状态、自检、协议和批量实验 | 保持为研发入口 |
+| HTTP API | 未开始 | 无 | FastAPI、参数校验、任务状态、文件管理 |
+| Web 前端 | 未开始 | 无 | React/Vite/TypeScript 演示与结果页 |
+| Windows 打包 | 未开始 | 无 | Web 版稳定后再评估 PyInstaller/桌面壳 |
 
-现有执行链：
-
-```text
-PowerShell / CLI / scripts
-          ↓
-watermark_lab 研究内核
-          ↓
-模型 + 数据 manifest + 攻击 + 指标
-          ↓
-results/ CSV / JSON
-```
-
-推荐目标架构：
+目标调用链：
 
 ```text
-React + Vite + TypeScript 前端
-              ↓ HTTP
-FastAPI 后端（参数校验、任务状态、文件管理）
-              ↓ 直接调用
-现有 watermark_lab 研究内核
-              ↓
-本地 artifacts/ + SQLite 元数据
+React 前端 -> FastAPI 后端 -> watermark_lab 研究内核
+                             -> 本地 artifacts + SQLite 元数据
 ```
 
-API 层不得复制模型算法；它只负责把请求转换为现有 Python 接口。第一版面向单机
-Windows 演示，FastAPI 与前端分别启动，稳定后再评估 PyInstaller/桌面壳。
+API 层只编排现有 Python 接口，不复制模型算法。第一版面向单机 Windows 演示。
 
 ## 3. 已完成里程碑
 
-| 阶段 | 状态 | 已完成证据 |
+| 阶段 | 状态 | 证据 |
 |---|---|---|
-| M1 框架 | 完成 | 统一接口、CLI、LSB 自检、测试 |
-| M2 基线 | Debug10 完成 | DWT-DCT + TrustMark-Q，4 数据集，44 攻击，3520 条 |
-| M3 WAM | Debug10 诊断完成 | 官方固定权重、1760 条主记录、负样本与失败探针 |
-| M4.1 AM-WAM | 完成 | 内容自适应强度、盲几何同步、消融和 held-out 测试 |
-| M4.2 多水印 | 未完成 | 自适应软聚类、消息计数和配对评估待实现 |
-| M5 正式实验/系统 | 未开始 | 大样本、前后端、论文图表、答辩材料待完成 |
+| M1 框架 | 完成 | 统一接口、CLI、LSB 自检、自动测试 |
+| M2 基线 | 完成 | DWT-DCT、TrustMark-Q、4×Debug10×44 攻击及公平强度校准 |
+| M3 WAM | 完成 | 官方 MIT 权重接入、全协议诊断、负样本和失败探针 |
+| M4.1 AM-WAM | 完成 | 盲几何同步、内容自适应强度、消融与 held-out 几何测试 |
+| M4.2 多水印 | 完成 | 自适应软聚类、官方硬 DBSCAN 对比、2,560 条固定记录 |
+| M5.1 正式比较 | 完成 | 690 test×44 攻击×4 模型，共 121,440 条，完整性检查通过 |
+| M5.2 系统/论文 | 未开始 | 前后端、论文图表整理、报告和答辩材料待完成 |
 
-当前自动测试共 38 项，最近一次提交前全部通过。项目固定 4 个 Debug10 manifest、每组
-10 张图，并使用 1 个控制、35 个单一和 8 个复合攻击条件。
+## 4. 已确认研究结论
 
-## 4. 已确认的研究结果
+- 四种正式比较方法均按数据集在独立 calibration split 上校准到平均 PSNR 约 40 dB。
+- M4.1 把 Debug10 逐图 PSNR 标准差从 1.517 dB 降到 0.224 dB；冻结参数后的未见
+  连续几何测试中，完整恢复率由 86.67% 提高到 92.08%。
+- M4.2 总体水印数量识别准确率由官方硬 DBSCAN 的 59.22% 提高到 67.97%；四水印
+  场景由 50.31% 提高到 99.69%。
+- M4.2 不是全面胜出：两/三水印会过分裂，5% 小水印区域仍无法全部恢复，匹配 Bit
+  Accuracy 小幅下降，聚类平均增加约 403 ms。这些负结果已保留。
+- formal-v1 中，AM-WAM 相对 WAM 的 Bit Accuracy 提高 0.188 个百分点（95% CI
+  0.162–0.218），完整恢复率提高 1.604 个百分点（1.357–1.874）；10° 旋转完整恢复
+  提高 49.42 个百分点，但平均解码增加约 914 ms，强模糊仍未改善。
+- formal-v1 的完整结论以 `docs/FORMAL_RESULTS.md` 为准，不能用 Debug10 数字替代。
 
-- DWT-DCT 与 TrustMark-Q 已校准到跨数据集平均 PSNR 约 40 dB，避免用不同可见强度
-  做不公平比较。
-- WAM 在相同 PSNR 下对多数数值攻击稳健，主要失败集中在强模糊、旋转/透视失配和
-  个别内容相关样本。
-- M4 的内容自适应强度把逐图 PSNR 标准差从 1.517 dB 降到 0.224 dB。
-- M4 主消融中，组合模型在重点几何攻击上的完整恢复率从 82.0% 提升到 95.5%。
-- 冻结参数后的未见连续几何测试中，完整恢复率从 86.67% 提升到 92.08%。
-- 粗到细几何候选加速曾导致内容相关错误分流，未纳入最终方案；失败记录保留。
-
-这些结论仍属于 40 张 Debug10 预实验，不能直接冒充最终论文的大样本结论。
-
-## 5. 当前关键目录
+## 5. 固定实验资产
 
 ```text
-configs/                    冻结协议、校准值和消融配置
-data/manifests/             已跟踪的固定样本清单和 SHA-256
-docs/                       实施、结果、复现和交接文档
-scripts/                    环境、下载、实验和分析入口
-src/watermark_lab/models/   DWT-DCT、TrustMark、WAM、AM-WAM
+configs/                    冻结攻击、校准、M4 和 formal-v1 配置
+data/manifests/             Debug10 与 formal-v1 固定清单、尺寸和 SHA-256
+docs/                       实现、结果、复现和交接文档
+scripts/                    数据恢复、校准、可恢复运行、统计和绘图入口
+src/watermark_lab/models/   DWT-DCT、TrustMark-Q、WAM、AM-WAM
 src/watermark_lab/innovations/
-                            几何同步与内容自适应模块
-tests/                      38 项自动测试
+                            几何同步、内容自适应和多水印软聚类
+tests/                      单元、协议、模型与恢复运行测试
 ```
 
-`data/raw/`、`checkpoints/`、`third_party/`、`results/` 和 `.venv*` 仅存在于开发者本机，
-恢复方式见 `REPRODUCIBILITY.md`。
+`data/raw/`、`checkpoints/`、`third_party/`、`results/` 和 `.venv*` 不进入 Git。共创者
+必须按复现指南恢复；不得从聊天附件或来源不明的网盘文件替换正式资产。
 
-## 6. 后续计划与优先级
+## 6. 下一步优先级
 
-### P0：协作基线（本轮）
+### P0：正式结果维护
 
-- 维护复现指南、状态交接和 README 导航。
-- 保证新克隆可重建环境、权重、数据和结果。
-- 每次合并前运行测试与静态检查。
+1. 论文和答辩数字只从 `docs/FORMAL_RESULTS.md` 与冻结统计 CSV 获取；
+2. 需要共享原始结果时，打包 `results/formal_v1/` 并记录 SHA-256，不提交 Git；
+3. 不在 formal-v1 test 上继续调参；新候选剪枝方案另建 calibration/test 协议。
 
-### P1：M4 第二阶段
+### P1：系统后端
 
-- 基于像素级 32 bit 软 logits 实现多水印自适应软聚类。
-- 定义多水印数量、消息匹配、局部掩膜真值与 Hungarian 配对指标。
-- 增加原始 WAM、单模块和完整 AM-WAM 消融。
-- 在独立 calibration/test 参数范围验证，避免对 held-out 反复调参。
+采用 FastAPI，首版端点：
 
-### P2：M5 正式实验
+- `GET /api/health`、`GET /api/models`；
+- `POST /api/watermarks/embed`、`POST /api/watermarks/decode`；
+- `POST /api/experiments`、`GET /api/experiments/{id}`；
+- `GET /api/experiments/{id}/artifacts`。
 
-- 扩大到预先固定的 COCO、DIV2K、DiffusionDB、W-Bench 样本。
-- 冻结强度、检测阈值和攻击协议，运行 DWT-DCT、TrustMark、WAM、AM-WAM。
-- 报告均值、标准差、配对 Bootstrap 95% CI、运行时和失败案例。
-- 输出论文表格、图、可视化热力图和可审计结果快照。
+首版使用本机任务执行器和 SQLite/JSON，不提前引入 Redis/Celery。模型实例复用，耗时
+任务不能阻塞 HTTP 请求线程。
 
-### P3：后端 API
+### P2：Web 前端
 
-建议使用 FastAPI，最小端点为：
+采用 React、Vite、TypeScript，至少提供环境状态、单图嵌入/提取、固定攻击实验、模型
+与数据集比较、任务历史和结果导出。前端只读取后端统计产物，不重写指标算法。
 
-- `GET /api/health`：环境、模型和权重状态；
-- `GET /api/models`：模型能力与参数范围；
-- `POST /api/watermarks/embed`：上传图像并嵌入消息；
-- `POST /api/watermarks/decode`：提取消息与定位热力图；
-- `POST /api/experiments`：创建攻击/对比实验任务；
-- `GET /api/experiments/{id}`：任务进度、错误和结果；
-- `GET /api/experiments/{id}/artifacts`：CSV、图表和样例列表。
+### P3：交付
 
-首版用单机后台执行器和 SQLite/JSON 状态即可；不要一开始引入 Redis/Celery。上传文件要
-限制类型、尺寸和数量，模型加载应复用，耗时任务不能阻塞 HTTP 请求线程。
+Windows 一键启动脚本、可选安装包、课程报告、PPT、演示视频、引用/许可证清单、最终
+Release 与结果压缩包 SHA-256。
 
-### P4：前端
+## 7. 风险与边界
 
-建议使用 React、Vite、TypeScript：
+1. CLI 可运行不等于前后端已完成。
+2. 运行时间只在相同硬件/环境内比较；本次 WAM/AM-WAM 用 GPU，传统方法与 TrustMark
+   用 CPU，不能把四者耗时画成统一硬件排名。
+3. formal-v1 test 已冻结，看到结果后不得回改强度、阈值、样本或攻击；改进必须另建
+   calibration/test 版本。
+4. 多水印 5% 小区域、低消息数过分裂和组合攻击退化仍是明确未解决问题。
+5. HiDDeN 因缺少满足官方实现、可验证权重、32-bit 盲提取和 Windows 可复现要求的
+   可靠适配器，不进入本轮正式对比。
 
-1. 环境/模型状态页；
-2. 单图嵌入与提取页，显示原图、水印图、PSNR、消息和定位热力图；
-3. 攻击实验页，可选择固定协议而非任意修改正式协议；
-4. 对比结果页，展示模型/数据集/攻击筛选、曲线、表格和失败样本；
-5. 任务历史与结果导出页。
-
-前端显示的指标必须直接读取后端产物，不能在浏览器里另写一套统计公式。
-
-### P5：交付
-
-- Windows 一键启动脚本和可选安装包；
-- 课程报告、演示视频、PPT、引用与开源许可证清单；
-- 最终仓库标签、Release 和结果压缩包 SHA-256。
-
-## 7. 风险与不可误判项
-
-1. 当前没有前端和 HTTP API；CLI 可运行不等于前后端已经完成。
-2. 当前结果是 Debug10 预实验，正式样本量和独立划分仍未完成。
-3. WAM 几何同步在 CPU 上明显增加解码耗时，正式报告必须展示准确率/成本权衡。
-4. 局部拼接和 copy-move 的定位真值尚需严格定义，不能混用代理指标作最终结论。
-5. 多水印软聚类仍是计划，不应在摘要中写成已经实现。
-6. 原始数据、权重和逐图结果未存入 Git，新成员必须按复现指南恢复。
-7. 修改冻结攻击或 held-out 配置必须新建版本并说明理由，不能覆盖旧证据。
-
-## 8. 新开对话时可直接使用的交接提示
+## 8. 新对话交接提示
 
 ```text
-这是 Watermark Lab（数字图像水印课程设计）项目。请先完整阅读：
+这是 Watermark Lab（数字图像水印课程设计）项目。先完整阅读：
 1. PROJECT_GUIDELINE.md
 2. docs/PROJECT_STATUS.md
 3. docs/REPRODUCIBILITY.md
-4. 与当前任务相关的 M2/M3/M4 实施和结果文档
+4. docs/FORMAL_RESULTS.md
+5. 与任务相关的 M2/M3/M4 实现和结果文档
 
-当前已完成 M1、M2 Debug10、M3 WAM 诊断和 M4.1（几何同步 + 内容自适应强度）。
-M4.2 多水印自适应软聚类、正式大样本实验、FastAPI 后端和 React 前端尚未完成。
-不要把 Debug10 结果写成最终结论，不要覆盖冻结 manifest/攻击/held-out 配置。
-开始修改前先检查 git status 和现有测试；修改后运行 ruff check . 与 pytest。
-本次任务是：<在此写明任务>。
+已完成 M1–M4.2，以及 formal-v1 的 121,440 条正式比较和统计图。不要覆盖冻结
+manifest、攻击、校准或 held-out 配置，不要把 Debug10 写成最终结论。开始修改前检查
+git status；修改后运行 ruff check . 和 pytest。当前任务是：<在此写明任务>。
 ```
 
-## 9. 下一次最合适的开发入口
+## 9. 最合适的开发入口
 
-若以研究创新优先，进入 M4.2，先写多水印数据结构、匹配指标和合成测试，再实现软聚类。
-若以课程演示系统优先，先建立 FastAPI 最小骨架和 `health/models/embed/decode` 四个端点，
-但必须直接复用现有 `watermark_lab` 内核。两条路线都不应修改已冻结的 M4 held-out 结果。
+下一阶段进入 FastAPI 最小骨架，直接复用 `watermark_lab`，优先实现
+`health/models/embed/decode` 四个端点；若先写论文，则直接使用 `docs/FORMAL_RESULTS.md`
+中的正式数字和 `results/formal_v1/figures/` 中的图。

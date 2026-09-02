@@ -248,7 +248,7 @@ DWT-DCT / HiDDeN / TrustMark / WAM 统一接入
 状态：已于 2026-09-01 完成官方 MIT 权重接入、单水印 Debug10 全协议实验和跨数据集
 失败诊断。已确认主要失败集中于强模糊、10° 旋转、个别内容相关图像以及未校准的
 图像级检测阈值；局部修复定位有效，但拼接/copy-move 的定位真值需要单独定义。
-多水印与聚类实验随 M4 自适应软聚类一起完成。阶段结果见
+多水印与聚类实验已在 M4.2 完成。阶段结果见
 [docs/M3_DEBUG_RESULTS.md](docs/M3_DEBUG_RESULTS.md)。
 
 ### M4：AM-WAM
@@ -263,13 +263,24 @@ DWT-DCT / HiDDeN / TrustMark / WAM 统一接入
 组合模型完整
 恢复率由 86.67% 提升至 92.08%；粗到细候选加速因内容相关错误分流未被采纳。阶段结果
 见 [docs/M4_DEBUG_RESULTS.md](docs/M4_DEBUG_RESULTS.md) 和
-[docs/M4_HELDOUT_RESULTS.md](docs/M4_HELDOUT_RESULTS.md)。多水印自适应软聚类和更可靠的
-候选加速仍属于 M4 第二阶段。
+[docs/M4_HELDOUT_RESULTS.md](docs/M4_HELDOUT_RESULTS.md)。M4.2 随后完成未知 2–4 水印
+数量的自适应软聚类、官方硬 DBSCAN 对比和 2560 条固定实验记录：总体计数准确率由
+59.22% 提升到 67.97%，4 水印场景由 50.31% 提升到 99.69%；同时确认低消息数过分裂、
+5% 小区域全部恢复失败和约 403 ms 额外聚类开销。正负结果见
+[docs/M4_MULTI_MESSAGE_RESULTS.md](docs/M4_MULTI_MESSAGE_RESULTS.md)。
 
 ### M5：正式实验与系统
 
 - 完成固定样本上的全部正式实验。
 - 输出统计图、失败案例、Windows GUI、课程报告和答辩材料。
+
+状态：正式比较部分已于 2026-09-02 完成。formal-v1 使用 140 张独立 calibration、
+690 张独立 test、44 条冻结攻击和 DWT-DCT、TrustMark-Q、WAM、AM-WAM 四种方法，共
+121,440 条完整记录。AM-WAM 相对 WAM 的 Bit Accuracy 配对提高 0.188 个百分点
+（95% CI 0.162–0.218），完整恢复率提高 1.604 个百分点（1.357–1.874）；最强收益为
+10° 旋转和重透视，但平均解码增加约 914 ms，强模糊仍未解决。详见
+[docs/FORMAL_RESULTS.md](docs/FORMAL_RESULTS.md)。FastAPI、React、Windows 打包、课程报告
+和答辩材料仍属于 M5 后续工作。
 
 ## 13. 范围控制
 

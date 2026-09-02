@@ -14,7 +14,7 @@ import numpy as np
 import yaml
 
 from watermark_lab.core.registry import create_model
-from watermark_lab.datasets.manifest import iter_manifest_images
+from watermark_lab.datasets.manifest import iter_manifest_images, read_manifest
 from watermark_lab.metrics.image_quality import psnr
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -126,6 +126,50 @@ def _package_version(name: str) -> str:
         return "not-installed"
 
 
+def _environment() -> dict[str, str]:
+    return {
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "torch": _package_version("torch"),
+        "trustmark": _package_version("trustmark"),
+        "opencv-python": _package_version("opencv-python"),
+    }
+
+
+def _write_calibration(
+    output_path: Path,
+    *,
+    suite: dict[str, Any],
+    target_psnr: float,
+    seed: int,
+    datasets: tuple[DatasetSpec, ...],
+    results: dict[str, Any],
+) -> None:
+    dataset_counts = {
+        item.dataset_id: len(read_manifest(item.manifest))
+        for item in datasets
+        if item.manifest.is_file()
+    }
+    payload = {
+        "suite_id": suite["id"],
+        "created_at": datetime.now().astimezone().isoformat(),
+        "target_psnr_db": target_psnr,
+        "seed": seed,
+        "image_count": sum(dataset_counts.values()),
+        "dataset_image_counts": dataset_counts,
+        "environment": _environment(),
+        "models": results,
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    temporary.replace(output_path)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Calibrate debug models to equal mean PSNR")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/debug_suite.yaml")
@@ -135,13 +179,31 @@ def main() -> int:
         nargs="+",
         help="optional model names to calibrate; existing results for other models are preserved",
     )
+    parser.add_argument(
+        "--datasets",
+        nargs="+",
+        help="optional dataset IDs; each completed dataset is checkpointed",
+    )
+    parser.add_argument("--device", default="auto")
     args = parser.parse_args()
     if args.iterations < 1:
         raise ValueError("iterations must be positive")
 
     config_path = args.config.resolve()
     config = _load_config(config_path)
-    datasets = _dataset_specs(config)
+    configured_datasets = _dataset_specs(config)
+    datasets = configured_datasets
+    if args.datasets:
+        known_datasets = {item.dataset_id for item in configured_datasets}
+        unknown_datasets = sorted(set(args.datasets) - known_datasets)
+        if unknown_datasets:
+            raise ValueError(
+                f"datasets are missing from calibration config: {', '.join(unknown_datasets)}"
+            )
+        selected_dataset_ids = set(args.datasets)
+        datasets = tuple(
+            item for item in configured_datasets if item.dataset_id in selected_dataset_ids
+        )
     suite = config["suite"]
     target_psnr = float(suite["target_psnr_db"])
     seed = int(suite["seed"])
@@ -154,57 +216,66 @@ def main() -> int:
 
     output_path = (PROJECT_ROOT / config["outputs"]["calibration"]).resolve()
     existing: dict[str, Any] = {}
-    if args.models and output_path.is_file():
+    if output_path.is_file():
         previous = json.loads(output_path.read_text(encoding="utf-8"))
         existing = dict(previous.get("models", {}))
 
     results: dict[str, Any] = existing
     for model_name in selected_models:
         bounds = configured_models[model_name]
+        model_options: dict[str, Any] = {
+            "strength": float(bounds["minimum_strength"]),
+        }
+        if model_name == "wam":
+            model_options["device"] = args.device
         model = create_model(
             model_name,
-            strength=float(bounds["minimum_strength"]),
+            **model_options,
         )
-        results[model_name] = {
+        previous_model = results.get(model_name, {})
+        model_result = {
+            "environment": {
+                **_environment(),
+                "model_device": str(
+                    getattr(getattr(model, "_backend", None), "device_name", args.device)
+                ),
+            },
             "search_bounds": {
                 "minimum_strength": float(bounds["minimum_strength"]),
                 "maximum_strength": float(bounds["maximum_strength"]),
             },
-            "datasets": {
-                dataset.dataset_id: _calibrate_model(
-                    model,
-                    bounds,
-                    dataset,
-                    seed,
-                    target_psnr,
-                    args.iterations,
-                )
-                for dataset in datasets
-            },
+            "datasets": dict(previous_model.get("datasets", {})),
         }
+        results[model_name] = model_result
+        for dataset in datasets:
+            model_result["datasets"][dataset.dataset_id] = _calibrate_model(
+                model,
+                bounds,
+                dataset,
+                seed,
+                target_psnr,
+                args.iterations,
+            )
+            _write_calibration(
+                output_path,
+                suite=suite,
+                target_psnr=target_psnr,
+                seed=seed,
+                datasets=configured_datasets,
+                results=results,
+            )
+            print(
+                f"calibration checkpoint: {model_name}/{dataset.dataset_id}",
+                flush=True,
+            )
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "suite_id": suite["id"],
-        "created_at": datetime.now().astimezone().isoformat(),
-        "target_psnr_db": target_psnr,
-        "seed": seed,
-        "image_count": sum(
-            len(list(iter_manifest_images(item.manifest, item.root))) for item in datasets
-        ),
-        "environment": {
-            "platform": platform.platform(),
-            "python": platform.python_version(),
-            "numpy": np.__version__,
-            "torch": _package_version("torch"),
-            "trustmark": _package_version("trustmark"),
-            "opencv-python": _package_version("opencv-python"),
-        },
-        "models": results,
-    }
-    output_path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    _write_calibration(
+        output_path,
+        suite=suite,
+        target_psnr=target_psnr,
+        seed=seed,
+        datasets=configured_datasets,
+        results=results,
     )
     print(f"calibration saved: {output_path}", flush=True)
     return 0

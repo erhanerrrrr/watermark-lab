@@ -1,5 +1,6 @@
 param(
-    [string]$PythonVersion = "3.12"
+    [string]$PythonVersion = "3.12",
+    [string]$TorchIndexUrl = "https://download.pytorch.org/whl/cpu"
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,7 +25,7 @@ if (-not (Test-Path -LiteralPath $EnvironmentPython)) {
 & $EnvironmentPython -m pip install `
     torch==2.5.1 `
     torchvision==0.20.1 `
-    --index-url https://download.pytorch.org/whl/cpu
+    --index-url $TorchIndexUrl
 & $EnvironmentPython -m pip install -e "${ProjectRoot}[wam,research,data,dev]"
 
 New-Item -ItemType Directory -Force -Path $SourceParent | Out-Null
@@ -62,6 +63,7 @@ if ($ActualWeightHash -ne $ExpectedWeightHash) {
 
 & $EnvironmentPython -m watermark_lab status
 Write-Host "WAM environment ready: $EnvironmentPath"
+Write-Host "PyTorch index: $TorchIndexUrl"
 Write-Host "Pinned source commit: $ActualCommit"
 Write-Host "Verified checkpoint: $CheckpointPath"
 Write-Host "Run the first model/weight check with:"

@@ -1,0 +1,30 @@
+suite:
+  id: formal-v1-calibration
+  seed: 20260902
+  target_psnr_db: 40.0
+
+datasets:
+  - id: coco2017_val_formal_cal40
+    manifest: data/manifests/coco2017_val_formal_cal40.csv
+    root: data/raw/formal_v1/coco2017_val/calibration
+  - id: div2k_formal_cal20
+    manifest: data/manifests/div2k_formal_cal20.csv
+    root: data/raw/formal_v1/div2k/calibration
+  - id: diffusiondb_2m_formal_cal40
+    manifest: data/manifests/diffusiondb_2m_formal_cal40.csv
+    root: data/raw/formal_v1/diffusiondb_2m/calibration
+  - id: w_bench_det_inversion_formal_cal40
+    manifest: data/manifests/w_bench_det_inversion_formal_cal40.csv
+    root: data/raw/formal_v1/w_bench_det_inversion/calibration
+
+models:
+  dwt_dct: {minimum_strength: 20.0, maximum_strength: 600.0}
+  trustmark_q: {minimum_strength: 0.5, maximum_strength: 4.0}
+  wam: {minimum_strength: 0.25, maximum_strength: 8.0}
+
+attacks:
+  config: configs/attacks.yaml
+
+outputs:
+  calibration: configs/formal_calibrated_strengths.json
+  results_dir: results/formal_v1

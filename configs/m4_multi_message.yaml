@@ -1,0 +1,54 @@
+suite:
+  id: m4-multi-message-debug10-v1
+  seed: 42
+  minimum_generated_message_hamming: 12
+
+scenarios:
+  - {id: balanced_2, message_count: 2, layout: balanced}
+  - {id: balanced_3, message_count: 3, layout: balanced}
+  - {id: balanced_4, message_count: 4, layout: balanced}
+  - {id: small_patch_2_p05, message_count: 2, layout: small_patch, patch_fraction: 0.05}
+
+inputs:
+  debug_suite: configs/debug_suite.yaml
+  calibration: configs/calibrated_strengths_debug10.json
+  attack_protocol: configs/attacks.yaml
+
+attacks:
+  - clean
+  - jpeg_q80
+  - jpeg_q50
+  - blur_r1
+  - blur_r3
+  - noise_s001
+  - resize_075
+  - blur1_contrast15_jpeg80
+
+embedding:
+  margin_fraction: 0.04
+  gap_fraction: 0.02
+
+official_hard_dbscan:
+  detection_threshold: 0.5
+  bit_logit_threshold: 0.0
+  epsilon: 1.0
+  minimum_samples: 500
+
+adaptive_soft_clustering:
+  detection_threshold: 0.5
+  bit_logit_threshold: 0.0
+  bit_probability_temperature: 1.0
+  maximum_messages: 4
+  candidate_limit: 512
+  seed_hamming_radius: 1
+  minimum_message_hamming_separation: 5
+  minimum_cluster_pixels: 96
+  minimum_cluster_fraction: 0.005
+  maximum_soft_hamming: 0.32
+  assignment_temperature: 0.08
+  refinement_iterations: 5
+  seed_prior_strength: 2.0
+  localization_threshold: 0.25
+
+outputs:
+  results_dir: results/m4_multi_message

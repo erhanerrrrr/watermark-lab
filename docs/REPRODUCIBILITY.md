@@ -69,6 +69,16 @@ powershell -ExecutionPolicy Bypass -File scripts\setup_wam_windows.ps1
 在运行元数据中记录显卡、驱动和 PyTorch CUDA 构建；不要把 CPU 与 GPU 耗时直接合并
 比较。
 
+例如 NVIDIA 驱动支持 CUDA 12.4 构建时：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_wam_windows.ps1 `
+  -TorchIndexUrl https://download.pytorch.org/whl/cu124
+```
+
+安装后必须以 `torch.cuda.is_available()` 和 WAM `self-check` 双重验收；仅看到显卡名称
+不代表当前虚拟环境安装的是 CUDA PyTorch。
+
 ## 4. 模型权重
 
 ### 4.1 DWT-DCT
@@ -197,6 +207,50 @@ Debug10 主消融为 `4 组 × 40 图 × 7 攻击 = 1120` 条。冻结参数后�
 
 该测试应产生 `4 组 × 40 图 × 6 攻击 = 960` 条记录。
 
+### 6.4 M4.2：多水印软聚类
+
+完整算法、分片命令和预期 2560 条记录见
+`docs/M4_MULTI_MESSAGE_IMPLEMENTATION.md`。运行器按图像生成 `.partials` 检查点；中断后
+重复原命令即可继续，不要使用 `--no-resume` 覆盖已有正式分片。
+
+### 6.5 formal-v1：扩大数据正式比较
+
+```powershell
+.\.venv-trustmark\Scripts\python.exe scripts\prepare_formal_datasets.py
+
+.\.venv-trustmark\Scripts\python.exe scripts\calibrate_m2_strengths.py `
+  --config configs\formal_calibration.yaml `
+  --models dwt_dct trustmark_q --iterations 7
+
+.\.venv-wam\Scripts\python.exe scripts\calibrate_m2_strengths.py `
+  --config configs\formal_calibration.yaml `
+  --models wam --device cuda --iterations 7
+
+.\.venv-trustmark\Scripts\python.exe scripts\run_formal_benchmark.py `
+  --models dwt_dct trustmark_q --device cpu
+
+.\.venv-wam\Scripts\python.exe scripts\run_formal_benchmark.py `
+  --models wam am_wam --device cuda
+
+.\.venv-trustmark\Scripts\python.exe scripts\analyze_formal_results.py
+.\.venv-trustmark\Scripts\python.exe scripts\plot_formal_results.py
+```
+
+八个 formal manifest 共固定 140 张 calibration 和 690 张 test；四模型完整结果应为
+121,440 条。协议、统计口径和逐图确定性种子见 `docs/FORMAL_EXPERIMENT.md`，当前正式
+验收数字见 `docs/FORMAL_RESULTS.md`。分析完成时 `analysis_status.json` 必须同时满足
+`complete=true`、`records=expected_records=121440`、`missing_files=[]`。
+
+正式产物交接前，用两个实际运行环境分别捕获环境：
+
+```powershell
+.\.venv-trustmark\Scripts\python.exe scripts\capture_environment.py `
+  --label trustmark-cpu --output results\formal_v1\environment-trustmark.json
+
+.\.venv-wam\Scripts\python.exe scripts\capture_environment.py `
+  --label wam-cuda --output results\formal_v1\environment-wam.json
+```
+
 ## 7. 结果验收基准
 
 不同 CPU/GPU 的耗时会变化，浮点指标允许有微小差异；记录数、输入哈希、协议版本和
@@ -208,6 +262,8 @@ Debug10 主消融为 `4 组 × 40 图 × 7 攻击 = 1120` 条。冻结参数后�
 | M3 | WAM 平均嵌入 PSNR 40.019 dB；1760 条 | `M3_DEBUG_RESULTS.md` |
 | M4 主消融 | A3 几何攻击完整恢复率 95.5%；1120 条 | `M4_DEBUG_RESULTS.md` |
 | M4 未见参数 | A3 完整恢复率 92.08%；960 条 | `M4_HELDOUT_RESULTS.md` |
+| M4.2 多水印 | 计数准确率 59.22%→67.97%；2560 条 | `M4_MULTI_MESSAGE_RESULTS.md` |
+| formal-v1 | AM-WAM 完整恢复率 96.21%；四模型 121,440 条 | `FORMAL_RESULTS.md` |
 
 若指标不一致，先比较 `git rev-parse HEAD`、manifest SHA-256、攻击配置、校准 JSON、权重
 哈希和设备，不要直接修改阈值来“对齐”结果。

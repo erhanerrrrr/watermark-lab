@@ -9,6 +9,11 @@ from watermark_lab.innovations.content_adaptive import (
     ContentAdaptiveStrengthController,
 )
 from watermark_lab.innovations.geometry_sync import GeometrySyncConfig, GeometrySyncDecoder
+from watermark_lab.innovations.multi_message import (
+    AdaptiveSoftMessageClusterer,
+    MultiMessageConfig,
+    MultiMessageResult,
+)
 from watermark_lab.models.wam_adapter import WamBackend, WamModel
 
 
@@ -26,6 +31,7 @@ class AmWamModel(WatermarkModel):
         geometry_sync: bool = True,
         adaptive_config: AdaptiveStrengthConfig | None = None,
         geometry_config: GeometrySyncConfig | None = None,
+        multi_message_config: MultiMessageConfig | None = None,
         detection_threshold: float = 0.5,
         minimum_detected_fraction: float = 0.01,
         bit_logit_threshold: float = 0.5,
@@ -54,6 +60,10 @@ class AmWamModel(WatermarkModel):
         self._geometry_decoder = GeometrySyncDecoder(
             self.base_model,
             config=geometry_config,
+        )
+        self._multi_message_decoder = AdaptiveSoftMessageClusterer(
+            self.base_model,
+            config=multi_message_config,
         )
 
     @property
@@ -94,6 +104,24 @@ class AmWamModel(WatermarkModel):
                 "am_wam": True,
                 "adaptive_strength_enabled": self.adaptive_strength,
                 "geometry_sync_enabled": self.geometry_sync,
+            }
+        )
+        return result
+
+    def decode_multiple(self, image: ImageArray) -> MultiMessageResult:
+        """Recover an unknown set of locally embedded WAM messages."""
+
+        source = self.validate_image(image)
+        result = self._multi_message_decoder.decode(source)
+        result.metadata.update(
+            {
+                "am_wam": True,
+                "multi_message_enabled": True,
+                "geometry_sync_applied": False,
+                "geometry_sync_note": (
+                    "M4.2 clusters one spatial coordinate system; geometric multi-message "
+                    "alignment remains a separately reported extension"
+                ),
             }
         )
         return result

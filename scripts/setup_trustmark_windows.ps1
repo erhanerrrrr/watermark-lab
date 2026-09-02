@@ -1,5 +1,6 @@
 param(
-    [string]$PythonVersion = "3.12"
+    [string]$PythonVersion = "3.12",
+    [string]$TorchIndexUrl = "https://download.pytorch.org/whl/cpu"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,11 +18,12 @@ if (-not (Test-Path -LiteralPath $EnvironmentPython)) {
 & $EnvironmentPython -m pip install `
     torch==2.5.1 `
     torchvision==0.20.1 `
-    --index-url https://download.pytorch.org/whl/cpu
+    --index-url $TorchIndexUrl
 & $EnvironmentPython -m pip install -e "${ProjectRoot}[trustmark,research,data,dev]"
 & $EnvironmentPython -m watermark_lab status
 
 Write-Host "TrustMark environment ready: $EnvironmentPath"
+Write-Host "PyTorch index: $TorchIndexUrl"
 Write-Host "Run the first model/weight check with:"
 Write-Host "  $EnvironmentPython -m watermark_lab self-check --model trustmark_q"
 Write-Host "Activate with: $EnvironmentPath\Scripts\Activate.ps1"

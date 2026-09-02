@@ -22,6 +22,12 @@
 - 已完成 M4 第一阶段 AM-WAM：加入保守门控的盲几何同步恢复和质量约束的内容自适应
   强度控制；40 张图、4 组消融、7 条重点攻击共生成 1120 条记录，并追加 960 条冻结
   参数后的未见连续几何攻击记录。
+- 已完成 M4.2 多水印自适应软聚类：40 张图、4 个消息布局、8 条攻击和 2 个盲解码器
+  共 2560 条记录；总体消息计数准确率由 59.22% 提升到 67.97%，同时如实保留低消息数
+  过分裂和 5% 小区域恢复失败。
+- 已完成 formal-v1 扩大数据正式比较：140 张 calibration、690 张独立 test、44 条攻击、
+  4 个模型共 121,440 条完整记录；AM-WAM 相对 WAM 的 Bit Accuracy 提高 0.188 个
+  百分点、完整恢复率提高 1.604 个百分点，同时平均解码增加约 914 ms。
 - 当前研究内核和 CLI 可用；HTTP API、前端界面和 Windows 安装包尚未开始。
 
 M2 的算法、参数和命令详见 [docs/M2_IMPLEMENTATION.md](docs/M2_IMPLEMENTATION.md)。
@@ -31,6 +37,11 @@ M3 定量结果和失败模式见 [docs/M3_DEBUG_RESULTS.md](docs/M3_DEBUG_RESUL
 M4 算法实现见 [docs/M4_IMPLEMENTATION.md](docs/M4_IMPLEMENTATION.md)，第一阶段消融与
 Bootstrap 结果见 [docs/M4_DEBUG_RESULTS.md](docs/M4_DEBUG_RESULTS.md)。
 冻结参数后的几何泛化结果见 [docs/M4_HELDOUT_RESULTS.md](docs/M4_HELDOUT_RESULTS.md)。
+M4.2 的算法与边界见
+[docs/M4_MULTI_MESSAGE_IMPLEMENTATION.md](docs/M4_MULTI_MESSAGE_IMPLEMENTATION.md)，定量结果见
+[docs/M4_MULTI_MESSAGE_RESULTS.md](docs/M4_MULTI_MESSAGE_RESULTS.md)。扩大数据与正式比较协议见
+[docs/FORMAL_EXPERIMENT.md](docs/FORMAL_EXPERIMENT.md)，121,440 条正式结果、置信区间、
+正负结论和耗时权衡见 [docs/FORMAL_RESULTS.md](docs/FORMAL_RESULTS.md)。
 
 ## Windows 快速开始
 
