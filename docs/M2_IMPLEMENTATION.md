@@ -52,7 +52,7 @@ pipeline 写入逐图结果 CSV，后续不得只保留表现较好的攻击强�
 - https://arxiv.org/abs/2311.18297
 
 TrustMark 0.9.0 要求 NumPy `<2.0`。必须使用独立的 Python 3.10–3.12 虚拟环境，
-通过 `pip install -e ".[trustmark,dev]"` 安装，避免污染其他 Python 项目。
+通过 `pip install -e ".[trustmark,research,data,dev]"` 安装，避免污染其他 Python 项目。
 中文 Windows 在构建 PyPI 源码包时还需要先设置 `$env:PYTHONUTF8='1'`，否则其
 `setup.py` 可能按 GBK 读取 UTF-8 README 并报 `UnicodeDecodeError`。
 

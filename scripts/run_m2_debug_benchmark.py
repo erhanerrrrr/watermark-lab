@@ -67,6 +67,11 @@ def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the complete M2 debug benchmark")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/debug_suite.yaml")
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        help="optional configured model names; default: every model in the suite",
+    )
     args = parser.parse_args()
 
     config = _load_yaml(args.config.resolve())
@@ -77,9 +82,15 @@ def main() -> int:
     output_root = (PROJECT_ROOT / config["outputs"]["results_dir"]).resolve()
     output_root.mkdir(parents=True, exist_ok=True)
 
+    configured_models = config["models"]
+    selected_models = args.models or list(configured_models)
+    unknown_models = sorted(set(selected_models) - set(configured_models))
+    if unknown_models:
+        raise ValueError(f"models are missing from debug config: {', '.join(unknown_models)}")
+
     dataset_rows: list[dict[str, Any]] = []
     all_records: list[ExperimentRecord] = []
-    for model_name in config["models"]:
+    for model_name in selected_models:
         first_dataset_id = str(config["datasets"][0]["id"])
         first_selected = calibration["models"][model_name]["datasets"][first_dataset_id][
             "selected"
@@ -143,7 +154,7 @@ def main() -> int:
         "protocol_seed": protocol.seed,
         "models": {
             name: calibration["models"][name]
-            for name in config["models"]
+            for name in selected_models
         },
         "datasets": config["datasets"],
         "record_count": len(all_records),

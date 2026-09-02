@@ -2,7 +2,11 @@
 
 面向复合攻击与局部篡改的数字图像水印课程设计项目。
 
-研究总方针见 [PROJECT_GUIDELINE.md](PROJECT_GUIDELINE.md)。
+研究总方针见 [PROJECT_GUIDELINE.md](PROJECT_GUIDELINE.md)。新成员应先阅读：
+
+- [项目状态与新对话交接](docs/PROJECT_STATUS.md)
+- [Windows 共创复现指南](docs/REPRODUCIBILITY.md)
+- [数据来源与许可证](data/SOURCES.md)
 
 ## 当前状态
 
@@ -18,6 +22,7 @@
 - 已完成 M4 第一阶段 AM-WAM：加入保守门控的盲几何同步恢复和质量约束的内容自适应
   强度控制；40 张图、4 组消融、7 条重点攻击共生成 1120 条记录，并追加 960 条冻结
   参数后的未见连续几何攻击记录。
+- 当前研究内核和 CLI 可用；HTTP API、前端界面和 Windows 安装包尚未开始。
 
 M2 的算法、参数和命令详见 [docs/M2_IMPLEMENTATION.md](docs/M2_IMPLEMENTATION.md)。
 本轮数据、校准结果和攻击结论见 [docs/M2_DEBUG_RESULTS.md](docs/M2_DEBUG_RESULTS.md)。
@@ -29,13 +34,13 @@ Bootstrap 结果见 [docs/M4_DEBUG_RESULTS.md](docs/M4_DEBUG_RESULTS.md)。
 
 ## Windows 快速开始
 
-推荐使用 Python 3.11；当前支持 Python 3.10–3.12：
+推荐使用 Python 3.12；当前支持 Python 3.10–3.12：
 
 ```powershell
-py -3.10 -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[research,data,dev]"
 python -m watermark_lab.cli status
 python -m watermark_lab.cli self-check --model dwt_dct
 python -m watermark_lab.cli protocol-status
@@ -48,8 +53,17 @@ TrustMark 使用独立环境安装：
 powershell -ExecutionPolicy Bypass -File scripts\setup_trustmark_windows.ps1
 ```
 
+WAM/AM-WAM 使用另一个独立环境：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_wam_windows.ps1
+```
+
 首次创建 `trustmark_q` 模型时会下载 Adobe 官方权重。TrustMark 0.9.0 要求
 NumPy `<2.0`，因此不要直接安装到其他项目共用的全局 Python 环境。
+
+模型权重、原始数据、完整结果和虚拟环境不进入 Git。恢复全部本地资产和按阶段复现实验
+时，严格按照 [共创者复现指南](docs/REPRODUCIBILITY.md) 执行。
 
 ## 项目结构
 
@@ -65,6 +79,10 @@ src/watermark_lab/
   models/                水印模型适配器
 tests/                   自动测试
 ```
+
+目前没有 `frontend/` 或 `backend/` 目录。计划采用 React/Vite/TypeScript 前端和
+FastAPI 后端，API 直接复用现有 Python 研究内核，路线图见
+[项目状态与新对话交接](docs/PROJECT_STATUS.md)。
 
 ## 设计原则
 

@@ -140,10 +140,12 @@ M3/M4 不应只做简单的“换一个新模型”，而应针对本轮暴露�
 .\.venv-trustmark\Scripts\python.exe scripts\download_debug_datasets.py
 
 # 在 40 张调试图像上进行 40 dB 目标强度校准
-.\.venv-trustmark\Scripts\python.exe scripts\calibrate_m2_strengths.py
+.\.venv-trustmark\Scripts\python.exe scripts\calibrate_m2_strengths.py `
+  --models dwt_dct trustmark_q
 
 # 运行 2 × 4 × 10 × 44 = 3520 条记录
-.\.venv-trustmark\Scripts\python.exe scripts\run_m2_debug_benchmark.py
+.\.venv-trustmark\Scripts\python.exe scripts\run_m2_debug_benchmark.py `
+  --models dwt_dct trustmark_q
 
 # 校验记录数并生成总体、类别和逐攻击对比汇总
 .\.venv-trustmark\Scripts\python.exe scripts\analyze_m2_debug_results.py

@@ -18,8 +18,10 @@ if (-not (Test-Path -LiteralPath $EnvironmentPython)) {
     torch==2.5.1 `
     torchvision==0.20.1 `
     --index-url https://download.pytorch.org/whl/cpu
-& $EnvironmentPython -m pip install -e "${ProjectRoot}[trustmark,dev]"
+& $EnvironmentPython -m pip install -e "${ProjectRoot}[trustmark,research,data,dev]"
 & $EnvironmentPython -m watermark_lab status
 
 Write-Host "TrustMark environment ready: $EnvironmentPath"
+Write-Host "Run the first model/weight check with:"
+Write-Host "  $EnvironmentPython -m watermark_lab self-check --model trustmark_q"
 Write-Host "Activate with: $EnvironmentPath\Scripts\Activate.ps1"

@@ -53,10 +53,10 @@ calibration/test 两个互斥区间。
 复现命令：
 
 ```powershell
-.\.venv-trustmark\Scripts\python.exe scripts\run_m4_ablation.py `
+.\.venv-wam\Scripts\python.exe scripts\run_m4_ablation.py `
   --config configs\m4_heldout_ablation.yaml --device cpu
 
-.\.venv-trustmark\Scripts\python.exe scripts\analyze_m4_results.py `
+.\.venv-wam\Scripts\python.exe scripts\analyze_m4_results.py `
   --results-dir results\m4_heldout_geometry `
   --geometry-attacks rotation_5_unseen rotation_7_unseen `
   rotation_minus7_unseen perspective_05_unseen perspective_08_unseen `

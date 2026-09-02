@@ -25,7 +25,7 @@ if (-not (Test-Path -LiteralPath $EnvironmentPython)) {
     torch==2.5.1 `
     torchvision==0.20.1 `
     --index-url https://download.pytorch.org/whl/cpu
-& $EnvironmentPython -m pip install -e "${ProjectRoot}[wam,dev]"
+& $EnvironmentPython -m pip install -e "${ProjectRoot}[wam,research,data,dev]"
 
 New-Item -ItemType Directory -Force -Path $SourceParent | Out-Null
 if (-not (Test-Path -LiteralPath (Join-Path $SourcePath "watermark_anything"))) {
@@ -64,4 +64,6 @@ if ($ActualWeightHash -ne $ExpectedWeightHash) {
 Write-Host "WAM environment ready: $EnvironmentPath"
 Write-Host "Pinned source commit: $ActualCommit"
 Write-Host "Verified checkpoint: $CheckpointPath"
+Write-Host "Run the first model/weight check with:"
+Write-Host "  $EnvironmentPython -m watermark_lab self-check --model wam"
 Write-Host "Activate with: $EnvironmentPath\Scripts\Activate.ps1"

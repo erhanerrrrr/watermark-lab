@@ -35,6 +35,10 @@ research = [
   "scikit-learn>=1.4,<2",
   "PyWavelets>=1.5,<2",
 ]
+data = [
+  "requests>=2.31,<3",
+  "huggingface-hub>=0.25,<2",
+]
 dev = [
   "pytest>=8,<10",
   "ruff>=0.6,<1",

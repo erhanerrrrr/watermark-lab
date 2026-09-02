@@ -99,9 +99,9 @@ bit margin 小于 0.20，则在 40--38 dB 的有限质量预算内搜索更强�
 ## 5. Windows 复现命令
 
 ```powershell
-.\.venv-trustmark\Scripts\python.exe scripts\run_m4_ablation.py --device cpu
-.\.venv-trustmark\Scripts\python.exe scripts\analyze_m4_results.py
-.\.venv-trustmark\Scripts\python.exe -m pytest
+.\.venv-wam\Scripts\python.exe scripts\run_m4_ablation.py --device cpu
+.\.venv-wam\Scripts\python.exe scripts\analyze_m4_results.py
+.\.venv-wam\Scripts\python.exe -m pytest
 ```
 
 实验配置见 `configs/m4_ablation.yaml`，默认读取 M2/M3 的固定 Debug10 manifest、WAM
