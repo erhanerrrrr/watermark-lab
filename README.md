@@ -28,7 +28,9 @@
 - 已完成 formal-v1 扩大数据正式比较：140 张 calibration、690 张独立 test、44 条攻击、
   4 个模型共 121,440 条完整记录；AM-WAM 相对 WAM 的 Bit Accuracy 提高 0.188 个
   百分点、完整恢复率提高 1.604 个百分点，同时平均解码增加约 914 ms。
-- 当前研究内核和 CLI 可用；HTTP API、前端界面和 Windows 安装包尚未开始。
+- 当前研究内核和 CLI 可用；已完成研究型 Web 前端 MVP 和最小 FastAPI，支持单张图片、
+  单个模型的真实水印实验。部分概览数据仍保留 Mock 回退，完整实验管理后端和 Windows
+  安装包尚未完成。
 
 M2 的算法、参数和命令详见 [docs/M2_IMPLEMENTATION.md](docs/M2_IMPLEMENTATION.md)。
 本轮数据、校准结果和攻击结论见 [docs/M2_DEBUG_RESULTS.md](docs/M2_DEBUG_RESULTS.md)。
