@@ -80,7 +80,18 @@ NumPy `<2.0`，因此不要直接安装到其他项目共用的全局 Python 环
 
 ## 本地 Web 实验平台
 
-最小 FastAPI 适配层支持单张图片、单个模型和单次攻击。WAM/AM-WAM API：
+最小 FastAPI 适配层支持单张图片、单个模型和单次攻击，并返回真实的 PSNR、SSIM、
+BER、Bit Accuracy 和 Detection 指标。启动 API 的 Python 环境决定当前可用模型；同一
+时间只需启动其中一个 API。
+
+DWT-DCT/LSB 使用已有轻量环境：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[api]"
+.\.venv\Scripts\python.exe -m uvicorn watermark_lab.api.app:app --reload
+```
+
+WAM/AM-WAM 使用已有 WAM 环境：
 
 ```powershell
 .\.venv-wam\Scripts\python.exe -m pip install -e ".[api]"
@@ -96,15 +107,19 @@ npm run dev
 ```
 
 浏览器打开 `http://localhost:5173/experiment`。API 文档位于
-`http://127.0.0.1:8000/docs`。如需 TrustMark-Q，请改用 `.venv-trustmark` 启动 API；
-两个官方深度模型因固定依赖不同，继续使用隔离环境。
+`http://127.0.0.1:8000/docs`。如需 TrustMark-Q，请在已有 `.venv-trustmark` 中安装
+`.[api]` 后从该环境启动 API。TrustMark-Q 与 WAM/AM-WAM 因固定依赖不同，继续使用
+隔离环境。API 不可用时前端保留 Mock 展示，但只有页面标记“真实 API 已连接”且实验
+成功返回时，结果才来自 Python 模型。
 
 ## 项目结构
 
 ```text
 configs/                 实验配置
 docs/                    研究与工程文档
+frontend/                React/Vite/TypeScript 实验平台
 src/watermark_lab/
+  api/                   FastAPI 路由、请求模型与实验适配层
   attacks/               统一攻击实现
   core/                  类型、接口和注册表
   datasets/              数据清单和读取
@@ -114,8 +129,8 @@ src/watermark_lab/
 tests/                   自动测试
 ```
 
-目前没有 `frontend/` 或 `backend/` 目录。计划采用 React/Vite/TypeScript 前端和
-FastAPI 后端，API 直接复用现有 Python 研究内核，路线图见
+FastAPI 适配层直接位于 `src/watermark_lab/api/`，因此不另设 `backend/` 目录；它只
+编排现有 Python 研究接口，不复制或修改模型算法。完整实验管理后端的后续路线见
 [项目状态与新对话交接](docs/PROJECT_STATUS.md)。
 
 ## 设计原则
