@@ -76,6 +76,27 @@ NumPy `<2.0`，因此不要直接安装到其他项目共用的全局 Python 环
 模型权重、原始数据、完整结果和虚拟环境不进入 Git。恢复全部本地资产和按阶段复现实验
 时，严格按照 [共创者复现指南](docs/REPRODUCIBILITY.md) 执行。
 
+## 本地 Web 实验平台
+
+最小 FastAPI 适配层支持单张图片、单个模型和单次攻击。WAM/AM-WAM API：
+
+```powershell
+.\.venv-wam\Scripts\python.exe -m pip install -e ".[api]"
+.\.venv-wam\Scripts\python.exe -m uvicorn watermark_lab.api.app:app --reload
+```
+
+另开一个终端启动前端：
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+浏览器打开 `http://localhost:5173/experiment`。API 文档位于
+`http://127.0.0.1:8000/docs`。如需 TrustMark-Q，请改用 `.venv-trustmark` 启动 API；
+两个官方深度模型因固定依赖不同，继续使用隔离环境。
+
 ## 项目结构
 
 ```text

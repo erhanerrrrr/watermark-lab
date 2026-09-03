@@ -1,0 +1,7 @@
+import { Database, ExternalLink, FileCheck2 } from 'lucide-react'
+import { datasets } from '../mock/data'
+import { PageHeader, StatusBadge } from '../components/Layout'
+
+export function DatasetsPage() {
+  return <><PageHeader eyebrow="数据资产" title="数据集" description="统一查看实验使用的数据来源、划分和本地准备状态。" action={<button className="secondary-button"><FileCheck2 size={16} /> 校验清单</button>} /><section className="dataset-summary"><div><span>来源数量</span><strong>4</strong><small>公开研究数据集</small></div><div><span>Debug10 样本</span><strong>40</strong><small>每个来源 10 张</small></div><div><span>Formal-v1 测试</span><strong>690</strong><small>独立 test 图像</small></div><div><span>校验方式</span><strong>SHA-256</strong><small>逐文件完整性校验</small></div></section><section className="dataset-grid">{datasets.map((dataset) => <article className="panel dataset-card" key={dataset.id}><div className="dataset-card-top"><div className="dataset-icon"><Database size={20} /></div><StatusBadge tone={dataset.progress === 100 ? 'green' : dataset.progress > 0 ? 'amber' : 'slate'}>{dataset.status}</StatusBadge></div><h2>{dataset.name}</h2><p>{dataset.source}</p><div className="dataset-meta"><span>规模<strong>{dataset.size}</strong></span><span>划分<strong>{dataset.split}</strong></span></div><div className="progress large"><span style={{ width: `${dataset.progress}%` }} /></div><div className="dataset-footer"><small>许可：{dataset.license}</small><button className="text-button">查看 manifest <ExternalLink size={13} /></button></div></article>)}</section></>
+}
