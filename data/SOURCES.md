@@ -1,6 +1,9 @@
 # 数据来源
 
 本目录仅提交来源说明和 manifest，原始图像位于 `data/raw/` 并被 Git 忽略。
+论文引用键、模型与数据集许可边界统一见
+[`docs/REFERENCES_AND_LICENSES.md`](../docs/REFERENCES_AND_LICENSES.md)；可直接导入的
+BibTeX 位于 [`REFERENCES.bib`](../REFERENCES.bib)。
 
 | 本地子集 | 官方来源 | 调试样本选择 |
 |---|---|---|

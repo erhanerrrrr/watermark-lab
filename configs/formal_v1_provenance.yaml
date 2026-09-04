@@ -1,0 +1,44 @@
+suite_id: formal-v1-test
+records: 121440
+result_models: [dwt_dct, trustmark_q, wam, am_wam]
+result_datasets:
+  - coco2017_val_formal_test200
+  - div2k_formal_test90
+  - diffusiondb_2m_formal_test200
+  - w_bench_det_inversion_formal_test200
+
+historical_run:
+  git_head_at_capture: 9909257c9c6e036c14e2fb5c2c6f2b141437ce0c
+  reconstructed_release_commit: e53e4c73a42190bb63b48dd380a489a15f3c367f
+  clean_worktree_at_capture: false
+  note: >-
+    formal-v1 was executed before its result-related files were committed. The
+    environment snapshots preserve the dirty-file list. Commit e53e4c7 contains
+    the subsequently tracked experiment implementation and frozen configuration;
+    the original run must not be represented as having started from a clean tree.
+
+environments:
+  trustmark:
+    file: results/formal_v1/environment-trustmark.json
+    label: trustmark-cpu
+    python: 3.12.10
+    packages:
+      watermark-lab: 0.1.0
+      numpy: 1.26.4
+      torch: 2.5.1+cpu
+      torchvision: 0.20.1+cpu
+      trustmark: 0.9.0
+  wam:
+    file: results/formal_v1/environment-wam.json
+    label: wam-cuda-compat
+    python: 3.13.7
+    packages:
+      watermark-lab: 0.1.0
+      numpy: 2.4.4
+      torch: 2.11.0+cu128
+      torchvision: 0.26.0+cu128
+      opencv-python: 4.13.0.92
+
+external_assets:
+  wam_source_commit: 2c08af04d037d5667c02f6ddebbda9ff04581c3e
+  wam_checkpoint_sha256: 90ef232384e023bd63245eb0c131abd69d2afc7b8f17a71ccedceb542bf009e2

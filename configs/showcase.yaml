@@ -4,7 +4,7 @@ updated_at: "2026-09-04"
 project:
   name: Watermark Lab
   subtitle: 面向复合攻击与局部篡改的数字图像水印实验平台
-  stage: M5.2
+  stage: M5.3
 
 models:
   lsb_reference:
@@ -214,3 +214,62 @@ formal_snapshot:
     perspective_heavy_gain_pp: 10.29
     decode_overhead_ms: 913.86
     unresolved: 强模糊 blur_r8 未改善；多水印 5% 小区域与低消息数过分裂仍待解决。
+  detection:
+    suite_id: formal-v1-detection
+    complete: true
+    records: 6640
+    calibration_negative_images: 140
+    test_positive_images: 690
+    test_negative_images: 690
+    target_calibration_fpr: 0.01
+    source: docs/FORMAL_DETECTION_RESULTS.md
+    models:
+      dwt_dct:
+        score_resolution: continuous
+        threshold: 0.8125000000000001
+        tpr: 1.0
+        fpr: 0.0
+        roc_auc: 1.0
+        intrinsic_fpr: 0.0
+      trustmark_q:
+        score_resolution: binary
+        threshold: 1.0000000000000002
+        tpr: 0.0
+        fpr: 0.0
+        roc_auc: 0.9876811594202899
+        intrinsic_fpr: 0.02318840579710145
+      wam:
+        score_resolution: continuous
+        threshold: 0.02642822265625
+        tpr: 1.0
+        fpr: 0.013043478260869565
+        roc_auc: 1.0
+        intrinsic_fpr: 0.0391304347826087
+      am_wam:
+        score_resolution: continuous
+        threshold: 0.02642822265625
+        tpr: 1.0
+        fpr: 0.017391304347826087
+        roc_auc: 1.0
+        intrinsic_fpr: 0.06811594202898551
+  robustness_v2:
+    suite_id: robustness-v2-validation
+    complete: true
+    records: 3840
+    images: 40
+    attack_cases: 24
+    bootstrap_iterations: 2000
+    source: docs/ROBUSTNESS_V2_RESULTS.md
+    wam:
+      bit_accuracy: 0.9757161458333333
+      complete_recovery: 0.8625
+      decode_ms: 40.849742812558056
+    am_wam:
+      bit_accuracy: 0.99560546875
+      complete_recovery: 0.9479166666666666
+      decode_ms: 841.4800438542254
+    innovation:
+      bit_accuracy_gain_pp: 1.9889322916666667
+      complete_recovery_gain_pp: 8.541666666666668
+      decode_overhead_ms: 800.6303010416673
+      off_grid_geometry_recovery_gain_pp: 20.25

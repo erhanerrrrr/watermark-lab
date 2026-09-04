@@ -4,6 +4,11 @@ import pytest
 from watermark_lab.attacks.basic import AttackSpec, apply_attack
 
 
+def _sample_image() -> np.ndarray:
+    values = np.arange(72 * 96 * 3, dtype=np.uint32).reshape(72, 96, 3)
+    return (values % 251).astype(np.uint8)
+
+
 @pytest.mark.parametrize(
     ("name", "parameters"),
     [
@@ -49,3 +54,42 @@ def test_copy_move_attack_is_reproducible() -> None:
     first = apply_attack(image, attack, np.random.default_rng(9))
     second = apply_attack(image, attack, np.random.default_rng(9))
     assert np.array_equal(first, second)
+
+
+@pytest.mark.parametrize(
+    ("name", "parameters"),
+    [
+        ("gamma", {"gamma": 0.75}),
+        ("color_shift", {"gains": [1.08, 1.0, 0.9]}),
+        ("pixelate", {"scale": 0.2}),
+        (
+            "perspective",
+            {
+                "offsets": [0.03, 0.01, -0.02, 0.04, -0.01, -0.03, 0.04, -0.02]
+            },
+        ),
+        (
+            "local_splice",
+            {"mask_ratio": 0.12, "center_x": 0.25, "center_y": 0.75, "aspect_ratio": 2.0},
+        ),
+        (
+            "copy_move",
+            {
+                "mask_ratio": 0.12,
+                "center_x": 0.75,
+                "center_y": 0.7,
+                "source_x": 0.2,
+                "source_y": 0.25,
+                "aspect_ratio": 0.5,
+            },
+        ),
+    ],
+)
+def test_robustness_v2_attacks_preserve_contract(
+    name: str, parameters: dict[str, object]
+) -> None:
+    image = _sample_image()
+    attacked = apply_attack(image, AttackSpec(name, parameters), np.random.default_rng(7))
+    assert attacked.shape == image.shape
+    assert attacked.dtype == np.uint8
+    assert not np.array_equal(attacked, image)

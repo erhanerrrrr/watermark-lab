@@ -59,6 +59,15 @@ def test_health_catalog_and_models_are_real(client: TestClient) -> None:
     catalog = client.get("/api/catalog").json()
     assert catalog["formal"]["records"] == 121_440
     assert catalog["formal"]["complete"] is True
+    assert catalog["formal"]["detection"]["records"] == 6_640
+    assert catalog["formal"]["detection"]["models"]["am_wam"]["fpr"] > 0.0
+    assert catalog["formal"]["robustness_v2"]["records"] == 3_840
+    assert (
+        catalog["formal"]["robustness_v2"]["innovation"][
+            "complete_recovery_gain_pp"
+        ]
+        > 8.0
+    )
     assert len(catalog["datasets"]) == 4
     assert len(catalog["protocol"]["cases"]) == 44
     assert len(catalog["interactive_attacks"]) == 8

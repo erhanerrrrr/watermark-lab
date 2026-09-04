@@ -8,8 +8,9 @@
 项目已完成 M1–M4.2：DWT-DCT、TrustMark-Q、WAM 和改进方法 AM-WAM 已在统一接口下
 运行；几何同步、内容自适应强度和多水印软聚类均已实现并有固定实验。formal-v1 已固定
 140 张 calibration、690 张独立 test 和 44 条攻击，四模型正式比较已完成 121,440 条。
-v0.2 本地展示平台已完成真实数据接入、持久化、导出与 Windows 一键启动，可用于课程
-现场演示；课程论文、答辩 PPT、演示视频和最终 Release 尚未完成。
+v0.2 本地展示平台已完成真实数据接入、持久化、导出与 Windows 一键启动。P0/P1 已补齐
+formal-v1 审计、6,640 条独立正负检测和 3,840 条 robustness-v2 外推验证；课程论文、
+答辩 PPT、演示视频和最终 Release 尚未完成。
 
 ## 2. 前后端现状
 
@@ -46,7 +47,9 @@ API 层只编排现有 Python 接口，不复制模型算法。第一版面向�
 | M4.2 多水印 | 完成 | 自适应软聚类、官方硬 DBSCAN 对比、2,560 条固定记录 |
 | M5.1 正式比较 | 完成 | 690 test×44 攻击×4 模型，共 121,440 条，完整性检查通过 |
 | M5.2 展示系统 | 完成 | v0.2 单端口 Web/API、真实数据源、SQLite/PNG、CSV、SHA-256、一键启动 |
-| M5.3 课程交付 | 进行中 | 课程论文、答辩 PPT、演示视频和最终 Release 待完成 |
+| P0 正式审计/检测 | 完成 | 121,440 条审计通过；140 calibration + 690 test 正负检测，共 6,640 条 |
+| P1 扩展鲁棒性 | 完成 | 24 条新攻击、40 张固定 test 图、4 模型，共 3,840 条与 2,000 次 Bootstrap |
+| M5.3 课程交付 | 进行中 | 引用/许可清单已完成；课程论文、答辩 PPT、演示视频和最终 Release 待完成 |
 
 ## 4. 已确认研究结论
 
@@ -61,6 +64,11 @@ API 层只编排现有 Python 接口，不复制模型算法。第一版面向�
   0.162–0.218），完整恢复率提高 1.604 个百分点（1.357–1.874）；10° 旋转完整恢复
   提高 49.42 个百分点，但平均解码增加约 914 ms，强模糊仍未改善。
 - formal-v1 的完整结论以 `docs/FORMAL_RESULTS.md` 为准，不能用 Debug10 数字替代。
+- clean 正负检测显示：WAM/AM-WAM 默认规则 FPR 为 3.91%/6.81%；冻结 1% calibration
+  目标阈值后，独立 test FPR 为 1.30%/1.74%，TPR 均为 100%。TrustMark 的公开二值
+  分数不能在本轮 1% 约束下同时保留 TPR。
+- robustness-v2 中 AM-WAM 相对 WAM 的 Bit Accuracy 提升 1.989 pp、完整恢复率提升
+  8.542 pp；非候选网格几何攻击提升 20.25 pp，但额外解码约 801 ms。
 
 ## 5. 固定实验资产
 
@@ -81,25 +89,24 @@ tests/                      单元、协议、模型与恢复运行测试
 `data/raw/`、`checkpoints/`、`third_party/`、`results/` 和 `.venv*` 不进入 Git。共创者
 必须按复现指南恢复；不得从聊天附件或来源不明的网盘文件替换正式资产。
 
-## 6. 下一步优先级
+## 6. P0/P1 完成状态与下一步
 
-### P0：正式结果维护
+### P0：正式结果审计与检测（已完成）
 
-1. 论文和答辩数字只从 `docs/FORMAL_RESULTS.md` 与冻结统计 CSV 获取；
-2. 需要共享原始结果时，打包 `results/formal_v1/` 并记录 SHA-256，不提交 Git；
-3. 不在 formal-v1 test 上继续调参；新候选剪枝方案另建 calibration/test 协议。
+1. `audit_formal_v1.py` 已验证结果键、manifest 隔离、环境、汇总和 Web 快照；
+2. 已完成 6,640 条 clean 正负检测并冻结 1% calibration 目标阈值；
+3. formal-v1 历史环境不一致和原始 dirty worktree 已如实固化，没有事后改写来源。
 
-### P1：展示平台维护
+### P1：扩展鲁棒性与结果表达（已完成）
 
-1. 展示前运行 `scripts/verify_showcase_windows.ps1`；
-2. 用 `scripts/start_showcase_windows.ps1` 启动单端口生产展示；
-3. 不把 `artifacts/web` 的交互结果混写成 formal-v1 论文统计；
-4. 若新增长时 Web 批量实验，再设计显式任务队列，当前不提前引入 Redis/Celery。
+1. 新增 24 条 robustness-v2 攻击并完成 3,840 条四模型验证；
+2. Web 结果页同时显示正式恢复、clean 检测误报和扩展几何外推；
+3. 创新表述限定为几何失配收益，并同时报告误报、强模糊和解码开销。
 
 ### P2：课程交付
 
-课程论文、答辩 PPT、演示视频、引用/许可证清单、最终 GitHub Release 与正式结果压缩包
-SHA-256。Web 展示流程见 `docs/WEB_SHOWCASE.md`。
+引用/许可证清单与 `REFERENCES.bib` 已完成。后续完成课程论文、答辩 PPT、演示视频、
+最终 GitHub Release 与正式结果压缩包 SHA-256。Web 展示流程见 `docs/WEB_SHOWCASE.md`。
 
 ## 7. 风险与边界
 
@@ -122,9 +129,10 @@ SHA-256。Web 展示流程见 `docs/WEB_SHOWCASE.md`。
 4. docs/FORMAL_RESULTS.md
 5. 与任务相关的 M2/M3/M4 实现和结果文档
 
-已完成 M1–M4.2、formal-v1 的 121,440 条正式比较和 v0.2 本地展示平台。不要覆盖冻结
-manifest、攻击、校准或 held-out 配置，不要把 Debug10 写成最终结论。开始修改前检查
-git status；修改后运行 scripts/verify_showcase_windows.ps1。当前任务是：<在此写明任务>。
+已完成 M1–M4.2、formal-v1 的 121,440 条正式比较、6,640 条独立检测、3,840 条
+robustness-v2 验证和 v0.2 本地展示平台。不要覆盖冻结 manifest、攻击、校准或 held-out
+配置，不要把 Debug10 写成最终结论。开始修改前检查 git status；修改后运行
+scripts/verify_showcase_windows.ps1。当前任务是：<在此写明任务>。
 ```
 
 ## 9. 最合适的开发入口

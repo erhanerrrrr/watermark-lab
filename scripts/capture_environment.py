@@ -97,6 +97,15 @@ def main() -> int:
         },
         "platform": platform.platform(),
         "packages": {name: _version(name) for name in PACKAGES},
+        "project": {
+            "source_version": __import__("watermark_lab").__version__,
+            "distribution_version": _version("watermark-lab"),
+            "pyproject_sha256": _sha256(PROJECT_ROOT / "pyproject.toml"),
+            "formal_config_sha256": _sha256(
+                PROJECT_ROOT / "configs/formal_benchmark.yaml"
+            ),
+            "attack_protocol_sha256": _sha256(PROJECT_ROOT / "configs/attacks.yaml"),
+        },
         "torch": torch_details,
         "nvidia_smi": _run(
             "nvidia-smi",

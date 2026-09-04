@@ -17,7 +17,9 @@
 
 官方仓库在 2026-09-01 已处于 archived 状态，因此项目同时固定提交哈希、权重哈希和
 依赖版本，避免未来主分支或下载地址变化影响复现。完整机器可读配置位于
-`configs/wam_official.yaml`。
+`configs/wam_official.yaml`。论文统一引用键为 `sander2025watermark`，见
+[`REFERENCES.bib`](../REFERENCES.bib) 与
+[`REFERENCES_AND_LICENSES.md`](REFERENCES_AND_LICENSES.md)。
 
 ## 2. Windows 环境
 

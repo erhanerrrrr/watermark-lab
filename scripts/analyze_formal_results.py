@@ -216,9 +216,13 @@ def main() -> int:
         for dataset in config["datasets"]:
             dataset_id = str(dataset["id"])
             path = results_dir / str(model_name) / f"{dataset_id}.csv"
-            dataset_records = len(
+            manifest_records = len(
                 read_manifest((PROJECT_ROOT / dataset["manifest"]).resolve())
-            ) * len(protocol.cases)
+            )
+            configured_limit = dataset.get("limit")
+            if configured_limit is not None:
+                manifest_records = min(manifest_records, int(configured_limit))
+            dataset_records = manifest_records * len(protocol.cases)
             expected_records += dataset_records
             if not path.is_file():
                 missing.append(str(path))

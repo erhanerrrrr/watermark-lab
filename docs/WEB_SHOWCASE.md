@@ -11,8 +11,9 @@
 powershell -ExecutionPolicy Bypass -File scripts\start_showcase_windows.ps1
 ```
 
-默认使用 `.venv-wam-gpu`，构建 React 生产版本，由 FastAPI 在同一个 `8000` 端口提供
-页面和 API，并自动打开浏览器。按 `Ctrl+C` 结束服务。
+默认依次寻找 `.venv-wam-formal`、`.venv-wam-gpu` 和 `.venv-wam`，构建 React 生产
+版本，由 FastAPI 在同一个 `8000` 端口提供页面和 API，并自动打开浏览器。按 `Ctrl+C`
+结束服务。
 
 其他运行时：
 
@@ -44,7 +45,10 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_showcase_windows.ps1
 4. 在“数据集”展示 manifest 数量，并点击 SHA-256 校验；
 5. 在“水印实验”上传一张至少 128×128 的图片，优先演示 AM-WAM + 10° 旋转；
 6. 在“实验结果”展示三张产物、消息比特、PSNR/SSIM/BER/Bit Accuracy，并下载 CSV；
-7. 最后陈述强模糊、额外耗时和多水印小区域仍是研究边界。
+7. 在“实验结果”补充展示 clean 正负检测：默认 AM-WAM 规则有 6.81% FPR，冻结阈值后
+   test FPR 为 1.74%，避免把正样本恢复率误称为低误报检测；
+8. 展示 robustness-v2 的 24 条新攻击与 3,840 条验证，说明几何外推提升 20.25 pp，
+   同时陈述强模糊、额外耗时和多水印小区域仍是研究边界。
 
 ## 4. 数据与持久化
 

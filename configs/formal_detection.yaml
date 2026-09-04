@@ -1,0 +1,45 @@
+suite:
+  id: formal-v1-detection
+  seed: 20260904
+  target_calibration_fpr: 0.01
+
+calibration_datasets:
+  - id: coco2017_val_formal_cal40
+    manifest: data/manifests/coco2017_val_formal_cal40.csv
+    root: data/raw/formal_v1/coco2017_val/calibration
+  - id: div2k_formal_cal20
+    manifest: data/manifests/div2k_formal_cal20.csv
+    root: data/raw/formal_v1/div2k/calibration
+  - id: diffusiondb_2m_formal_cal40
+    manifest: data/manifests/diffusiondb_2m_formal_cal40.csv
+    root: data/raw/formal_v1/diffusiondb_2m/calibration
+  - id: w_bench_det_inversion_formal_cal40
+    manifest: data/manifests/w_bench_det_inversion_formal_cal40.csv
+    root: data/raw/formal_v1/w_bench_det_inversion/calibration
+
+test_datasets:
+  - id: coco2017_val_formal_test200
+    calibration_id: coco2017_val_formal_cal40
+    manifest: data/manifests/coco2017_val_formal_test200.csv
+    root: data/raw/formal_v1/coco2017_val/test
+  - id: div2k_formal_test90
+    calibration_id: div2k_formal_cal20
+    manifest: data/manifests/div2k_formal_test90.csv
+    root: data/raw/formal_v1/div2k/test
+  - id: diffusiondb_2m_formal_test200
+    calibration_id: diffusiondb_2m_formal_cal40
+    manifest: data/manifests/diffusiondb_2m_formal_test200.csv
+    root: data/raw/formal_v1/diffusiondb_2m/test
+  - id: w_bench_det_inversion_formal_test200
+    calibration_id: w_bench_det_inversion_formal_cal40
+    manifest: data/manifests/w_bench_det_inversion_formal_test200.csv
+    root: data/raw/formal_v1/w_bench_det_inversion/test
+
+models: [dwt_dct, trustmark_q, wam, am_wam]
+
+inputs:
+  calibration: configs/formal_calibrated_strengths.json
+  m4_config: configs/m4_ablation.yaml
+
+outputs:
+  results_dir: results/formal_detection

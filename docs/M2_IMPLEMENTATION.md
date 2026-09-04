@@ -49,7 +49,9 @@ pipeline 写入逐图结果 CSV，后续不得只保留表现较好的攻击强�
 
 - https://github.com/adobe/trustmark
 - https://github.com/adobe/trustmark/blob/main/python/CONFIG.md
-- https://arxiv.org/abs/2311.18297
+- 论文统一引用键：`bui2025trustmark`，见
+  [`REFERENCES.bib`](../REFERENCES.bib) 与
+  [`REFERENCES_AND_LICENSES.md`](REFERENCES_AND_LICENSES.md)。
 
 TrustMark 0.9.0 要求 NumPy `<2.0`。必须使用独立的 Python 3.10–3.12 虚拟环境，
 通过 `pip install -e ".[trustmark,research,data,dev]"` 安装，避免污染其他 Python 项目。

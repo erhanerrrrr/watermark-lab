@@ -2,6 +2,7 @@
 .venv-trustmark/
 .venv-wam/
 .venv-wam-gpu/
+.venv-wam-formal/
 __pycache__/
 *.py[cod]
 .pytest_cache/

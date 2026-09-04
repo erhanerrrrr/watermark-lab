@@ -104,6 +104,8 @@ class FormalSnapshot(BaseModel):
     data_source: str
     models: dict[str, FormalModelMetrics]
     innovation: dict[str, Any]
+    detection: dict[str, Any]
+    robustness_v2: dict[str, Any]
 
 
 class CatalogResponse(BaseModel):

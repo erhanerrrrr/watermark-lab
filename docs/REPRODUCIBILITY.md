@@ -22,8 +22,9 @@ Debug10 数据集和 M2–M4 实验结果。研究结论以版本化配置、man
 
 ## 2. 前置条件与克隆
 
-参考复现平台为 Windows 10/11 x64、PowerShell、Git、Python 3.12。代码支持 Python
-3.10–3.12，但同一次对比实验必须统一 Python 和 PyTorch 版本。CPU 路径是基准路径；
+参考复现平台为 Windows 10/11 x64、PowerShell、Git、Python 3.12。基础代码支持 Python
+3.10–3.13，但 TrustMark 固定在 Python 3.12/NumPy 1.x 隔离环境；同一次对比实验必须
+统一 Python 和 PyTorch 版本。CPU 路径是基准路径；
 WAM 几何搜索在 CPU 上较慢。建议预留至少 10 GB 磁盘空间。
 
 ```powershell
@@ -47,6 +48,7 @@ git config user.email "你的 GitHub noreply 邮箱"
 | `.venv` | DWT-DCT、CLI、快速测试 | 手工创建轻量环境 |
 | `.venv-trustmark` | M2 的 DWT-DCT 与 TrustMark-Q | `setup_trustmark_windows.ps1` |
 | `.venv-wam` | M3 WAM 与 M4 AM-WAM | `setup_wam_windows.ps1` |
+| `.venv-wam-formal` | 精确恢复 formal-v1 WAM 核心运行时 | `setup_formal_wam_windows.ps1` |
 
 轻量环境：
 
@@ -78,6 +80,19 @@ powershell -ExecutionPolicy Bypass -File scripts\setup_wam_windows.ps1 `
 
 安装后必须以 `torch.cuda.is_available()` 和 WAM `self-check` 双重验收；仅看到显卡名称
 不代表当前虚拟环境安装的是 CUDA PyTorch。
+
+formal-v1 的 WAM/AM-WAM 历史运行实际使用 Python 3.13.7、NumPy 2.4.4、PyTorch
+2.11.0+cu128 和 Torchvision 0.26.0+cu128；这与早期文档中的 3.12/2.5.1 参考环境不同。
+该事实已固化在 `configs/formal_v1_provenance.yaml`，精确核心兼容环境使用：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_formal_wam_windows.ps1
+.\.venv-wam-formal\Scripts\python.exe scripts\audit_formal_v1.py
+```
+
+原始运行发生在旧提交的脏工作树上，环境快照保留了文件列表；不得将其事后表述成 clean
+commit。当前发布提交保存了相关实现与冻结配置，`audit_formal_v1.py` 用于核对结果键、
+manifest、环境、统计 CSV 和 Web 快照。
 
 ## 4. 模型权重
 
@@ -251,6 +266,41 @@ Debug10 主消融为 `4 组 × 40 图 × 7 攻击 = 1120` 条。冻结参数后�
   --label wam-cuda --output results\formal_v1\environment-wam.json
 ```
 
+### 6.6 formal-v1 审计与独立检测
+
+```powershell
+.\.venv-trustmark\Scripts\python.exe scripts\audit_formal_v1.py
+
+.\.venv-trustmark\Scripts\python.exe scripts\run_formal_detection.py `
+  --models dwt_dct trustmark_q --device cpu
+
+.\.venv-wam-formal\Scripts\python.exe scripts\run_formal_detection.py `
+  --models wam am_wam --device cuda
+
+.\.venv-trustmark\Scripts\python.exe scripts\analyze_formal_detection.py
+```
+
+完整检测结果必须为 6,640 条，阈值只从 140 张 calibration 负样本生成。690 张 test
+负样本不得用于阈值回调。结果解释见 `docs/FORMAL_DETECTION_RESULTS.md`。
+
+### 6.7 robustness-v2 扩展验证
+
+```powershell
+.\.venv-trustmark\Scripts\python.exe scripts\run_formal_benchmark.py `
+  --config configs\robustness_v2_validation.yaml `
+  --models dwt_dct trustmark_q --device cpu
+
+.\.venv-wam-formal\Scripts\python.exe scripts\run_formal_benchmark.py `
+  --config configs\robustness_v2_validation.yaml `
+  --models wam am_wam --device cuda
+
+.\.venv-trustmark\Scripts\python.exe scripts\analyze_formal_results.py `
+  --config configs\robustness_v2_validation.yaml --bootstrap-iterations 2000
+```
+
+验证结果必须为 3,840 条。24 条攻击已冻结在 `configs/robustness_v2_attacks.yaml`；若做
+690 张全量扩展，使用 `configs/robustness_v2_benchmark.yaml`，不得覆盖 v2 攻击配置。
+
 ## 7. 结果验收基准
 
 不同 CPU/GPU 的耗时会变化，浮点指标允许有微小差异；记录数、输入哈希、协议版本和
@@ -264,6 +314,8 @@ Debug10 主消融为 `4 组 × 40 图 × 7 攻击 = 1120` 条。冻结参数后�
 | M4 未见参数 | A3 完整恢复率 92.08%；960 条 | `M4_HELDOUT_RESULTS.md` |
 | M4.2 多水印 | 计数准确率 59.22%→67.97%；2560 条 | `M4_MULTI_MESSAGE_RESULTS.md` |
 | formal-v1 | AM-WAM 完整恢复率 96.21%；四模型 121,440 条 | `FORMAL_RESULTS.md` |
+| formal detection | 4 模型 × 830 图 × 正负样本，共 6640 条 | `FORMAL_DETECTION_RESULTS.md` |
+| robustness-v2 | AM-WAM/WAM 完整恢复差 +8.542 pp；3840 条 | `ROBUSTNESS_V2_RESULTS.md` |
 
 若指标不一致，先比较 `git rev-parse HEAD`、manifest SHA-256、攻击配置、校准 JSON、权重
 哈希和设备，不要直接修改阈值来“对齐”结果。

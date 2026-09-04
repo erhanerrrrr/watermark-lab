@@ -279,8 +279,10 @@ DWT-DCT / HiDDeN / TrustMark / WAM 统一接入
 121,440 条完整记录。AM-WAM 相对 WAM 的 Bit Accuracy 配对提高 0.188 个百分点
 （95% CI 0.162–0.218），完整恢复率提高 1.604 个百分点（1.357–1.874）；最强收益为
 10° 旋转和重透视，但平均解码增加约 914 ms，强模糊仍未解决。详见
-[docs/FORMAL_RESULTS.md](docs/FORMAL_RESULTS.md)。FastAPI、React、Windows 打包、课程报告
-和答辩材料仍属于 M5 后续工作。
+[docs/FORMAL_RESULTS.md](docs/FORMAL_RESULTS.md)。2026-09-04 又完成 formal-v1 审计、
+6,640 条独立 clean 正负检测、24 条新攻击下的 3,840 条 robustness-v2 验证，以及
+FastAPI/React/Windows 一键展示。课程论文、答辩 PPT、演示视频与最终 Release 仍属于
+M5.3 后续工作。
 
 ## 13. 范围控制
 
@@ -301,3 +303,7 @@ DWT-DCT / HiDDeN / TrustMark / WAM 统一接入
 5. 所有结果能否用固定配置和随机种子重新运行得到？
 
 满足以上五点，才视为完成研究目标。
+
+论文、答辩和 Release 的统一引用键与第三方许可边界见
+[docs/REFERENCES_AND_LICENSES.md](docs/REFERENCES_AND_LICENSES.md)，BibTeX 以根目录
+[REFERENCES.bib](REFERENCES.bib) 为准。

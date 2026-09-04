@@ -40,7 +40,7 @@ function Invoke-CheckedNative {
 
 $projectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $pythonCandidates = switch ($Runtime) {
-    "wam" { @(".venv-wam-gpu\Scripts\python.exe", ".venv-wam\Scripts\python.exe") }
+    "wam" { @(".venv-wam-formal\Scripts\python.exe", ".venv-wam-gpu\Scripts\python.exe", ".venv-wam\Scripts\python.exe") }
     "trustmark" { @(".venv-trustmark\Scripts\python.exe") }
     "base" { @(".venv\Scripts\python.exe", ".venv-trustmark\Scripts\python.exe") }
 }

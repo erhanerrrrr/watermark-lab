@@ -103,6 +103,41 @@ export interface FormalSnapshot {
     decode_overhead_ms: number
     unresolved: string
   }
+  detection: {
+    suite_id: string
+    complete: boolean
+    records: number
+    calibration_negative_images: number
+    test_positive_images: number
+    test_negative_images: number
+    target_calibration_fpr: number
+    source: string
+    models: Record<string, {
+      score_resolution: 'continuous' | 'binary'
+      threshold: number
+      tpr: number
+      fpr: number
+      roc_auc: number
+      intrinsic_fpr: number
+    }>
+  }
+  robustness_v2: {
+    suite_id: string
+    complete: boolean
+    records: number
+    images: number
+    attack_cases: number
+    bootstrap_iterations: number
+    source: string
+    wam: Pick<FormalModelMetrics, 'bit_accuracy' | 'complete_recovery' | 'decode_ms'>
+    am_wam: Pick<FormalModelMetrics, 'bit_accuracy' | 'complete_recovery' | 'decode_ms'>
+    innovation: {
+      bit_accuracy_gain_pp: number
+      complete_recovery_gain_pp: number
+      decode_overhead_ms: number
+      off_grid_geometry_recovery_gain_pp: number
+    }
+  }
 }
 
 export interface ApiCatalog {

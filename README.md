@@ -8,6 +8,7 @@
 - [Windows 共创复现指南](docs/REPRODUCIBILITY.md)
 - [本地展示与 Web 开发指南](docs/WEB_SHOWCASE.md)
 - [数据来源与许可证](data/SOURCES.md)
+- [论文引用与第三方许可清单](docs/REFERENCES_AND_LICENSES.md)
 
 ## 当前状态
 
@@ -29,6 +30,12 @@
 - 已完成 formal-v1 扩大数据正式比较：140 张 calibration、690 张独立 test、44 条攻击、
   4 个模型共 121,440 条完整记录；AM-WAM 相对 WAM 的 Bit Accuracy 提高 0.188 个
   百分点、完整恢复率提高 1.604 个百分点，同时平均解码增加约 914 ms。
+- 已完成 P0 正式结果审计和独立检测评价：121,440 条结果与冻结快照审计通过；四模型
+  clean 正/负检测共 6,640 条，使用 140 张 calibration 负样本冻结阈值，并在 690 组
+  test 正负样本上报告 TPR、FPR、ROC-AUC 与 Wilson 置信区间。
+- 已完成 P1 robustness-v2 扩展验证：新增 24 条离网格几何、空间随机局部、光度与
+  打印/屏摄代理攻击；40 张固定 test 图、4 个模型共 3,840 条记录。AM-WAM 相对 WAM
+  的 Bit Accuracy 提升 1.989 pp，完整恢复率提升 8.542 pp，额外解码约 801 ms。
 - 已完成 v0.2 本地展示平台：React 六个页面全部接入真实 API/冻结配置，FastAPI 支持
   SQLite 历史、PNG 产物、详情查询、CSV 导出、独立嵌入/提取、manifest 下载与 SHA-256
   校验；生产前端由 FastAPI 同端口提供，Windows 脚本可一键构建并启动。
@@ -45,10 +52,16 @@ M4.2 的算法与边界见
 [docs/M4_MULTI_MESSAGE_RESULTS.md](docs/M4_MULTI_MESSAGE_RESULTS.md)。扩大数据与正式比较协议见
 [docs/FORMAL_EXPERIMENT.md](docs/FORMAL_EXPERIMENT.md)，121,440 条正式结果、置信区间、
 正负结论和耗时权衡见 [docs/FORMAL_RESULTS.md](docs/FORMAL_RESULTS.md)。
+独立检测结果见 [docs/FORMAL_DETECTION_RESULTS.md](docs/FORMAL_DETECTION_RESULTS.md)，
+新攻击外推结果见 [docs/ROBUSTNESS_V2_RESULTS.md](docs/ROBUSTNESS_V2_RESULTS.md)，P0/P1
+收口清单见 [docs/P0_P1_COMPLETION.md](docs/P0_P1_COMPLETION.md)。
+论文统一使用根目录 [REFERENCES.bib](REFERENCES.bib) 中的引用键；模型、权重、数据集的
+版本和许可边界以 [docs/REFERENCES_AND_LICENSES.md](docs/REFERENCES_AND_LICENSES.md) 为准。
 
 ## Windows 快速开始
 
-推荐使用 Python 3.12；当前支持 Python 3.10–3.12：
+推荐使用 Python 3.12；基础代码支持 Python 3.10–3.13，TrustMark 固定使用 Python 3.12
+与 NumPy 1.x，不能与 WAM 正式兼容环境混装：
 
 ```powershell
 py -3.12 -m venv .venv
@@ -71,6 +84,12 @@ WAM/AM-WAM 使用另一个独立环境：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\setup_wam_windows.ps1
+```
+
+精确恢复 formal-v1 记录的 WAM 核心运行时使用：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_formal_wam_windows.ps1
 ```
 
 首次创建 `trustmark_q` 模型时会下载 Adobe 官方权重。TrustMark 0.9.0 要求

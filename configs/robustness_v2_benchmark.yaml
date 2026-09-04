@@ -1,0 +1,34 @@
+suite:
+  id: robustness-v2-test
+  seed: 20260904
+  target_psnr_db: 40.0
+
+datasets:
+  - id: coco2017_val_formal_test200
+    calibration_id: coco2017_val_formal_cal40
+    manifest: data/manifests/coco2017_val_formal_test200.csv
+    root: data/raw/formal_v1/coco2017_val/test
+  - id: div2k_formal_test90
+    calibration_id: div2k_formal_cal20
+    manifest: data/manifests/div2k_formal_test90.csv
+    root: data/raw/formal_v1/div2k/test
+  - id: diffusiondb_2m_formal_test200
+    calibration_id: diffusiondb_2m_formal_cal40
+    manifest: data/manifests/diffusiondb_2m_formal_test200.csv
+    root: data/raw/formal_v1/diffusiondb_2m/test
+  - id: w_bench_det_inversion_formal_test200
+    calibration_id: w_bench_det_inversion_formal_cal40
+    manifest: data/manifests/w_bench_det_inversion_formal_test200.csv
+    root: data/raw/formal_v1/w_bench_det_inversion/test
+
+models: [dwt_dct, trustmark_q, wam, am_wam]
+
+attacks:
+  config: configs/robustness_v2_attacks.yaml
+
+inputs:
+  calibration: configs/formal_calibrated_strengths.json
+  m4_config: configs/m4_ablation.yaml
+
+outputs:
+  results_dir: results/robustness_v2

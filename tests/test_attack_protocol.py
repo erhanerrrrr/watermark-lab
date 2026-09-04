@@ -33,3 +33,23 @@ cases:
 
     with pytest.raises(ValueError, match="unsupported attack"):
         load_attack_protocol(protocol_path)
+
+
+def test_robustness_v2_protocol_is_frozen_and_executable() -> None:
+    protocol = load_attack_protocol(Path("configs/robustness_v2_attacks.yaml"))
+    values = np.arange(96 * 128 * 3, dtype=np.uint32).reshape(96, 128, 3)
+    image = (values % 251).astype(np.uint8)
+
+    assert protocol.protocol_id == "wm-robustness-v2"
+    assert protocol.version == 2
+    assert len(protocol.cases) == 24
+    assert {case.category for case in protocol.cases} == {
+        "off_grid_geometry",
+        "spatially_varied_local",
+        "photometric_unseen",
+        "capture_proxy",
+    }
+    for index, case in enumerate(protocol.cases):
+        output = apply_attack_case(image, case, np.random.default_rng(protocol.seed + index))
+        assert output.shape == image.shape
+        assert output.dtype == np.uint8

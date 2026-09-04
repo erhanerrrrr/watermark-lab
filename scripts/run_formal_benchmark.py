@@ -3,8 +3,11 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import importlib.metadata
 import json
 import platform
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,6 +22,19 @@ from watermark_lab.innovations.content_adaptive import AdaptiveStrengthConfig
 from watermark_lab.innovations.geometry_sync import GeometrySyncConfig
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _command(*command: str) -> str | None:
+    completed = subprocess.run(
+        command,
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    return completed.stdout.strip() if completed.returncode == 0 else None
 
 
 def _load_mapping(path: Path) -> dict[str, Any]:
@@ -181,11 +197,15 @@ def main() -> int:
             manifest = (PROJECT_ROOT / dataset["manifest"]).resolve()
             dataset_root = (PROJECT_ROOT / dataset["root"]).resolve()
             manifest_count = len(read_manifest(manifest))
-            full_sample_count = (
-                min(manifest_count, args.limit_per_dataset)
-                if args.limit_per_dataset is not None
-                else manifest_count
-            )
+            configured_limit = dataset.get("limit")
+            if configured_limit is not None and int(configured_limit) < 1:
+                raise ValueError(f"dataset limit must be positive: {dataset_id}")
+            limits = [manifest_count]
+            if configured_limit is not None:
+                limits.append(int(configured_limit))
+            if args.limit_per_dataset is not None:
+                limits.append(args.limit_per_dataset)
+            full_sample_count = min(limits)
             samples = list(
                 iter_manifest_images(
                     manifest,
@@ -322,6 +342,10 @@ def main() -> int:
         "created_at": datetime.now().astimezone().isoformat(),
         "platform": platform.platform(),
         "python": platform.python_version(),
+        "python_executable": sys.executable,
+        "watermark_lab_distribution": importlib.metadata.version("watermark-lab"),
+        "git_head": _command("git", "rev-parse", "HEAD"),
+        "git_status": _command("git", "status", "--short"),
         "protocol_id": protocol.protocol_id,
         "protocol_version": protocol.version,
         "protocol_seed": protocol.seed,
@@ -333,10 +357,18 @@ def main() -> int:
         "attacks": [case.case_id for case in cases],
         "runs": run_rows,
     }
-    (output_root / "run_metadata.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2),
+    serialized = json.dumps(metadata, ensure_ascii=False, indent=2)
+    # Keep an immutable record for every resumed/sharded invocation. The legacy
+    # top-level file remains a convenient pointer to the latest invocation.
+    metadata_dir = output_root / "run_metadata"
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    metadata_token = datetime.now().strftime("%Y%m%dT%H%M%S%f")
+    model_token = "-".join(selected_models)
+    (metadata_dir / f"{metadata_token}-{model_token}.json").write_text(
+        serialized,
         encoding="utf-8",
     )
+    (output_root / "run_metadata.json").write_text(serialized, encoding="utf-8")
     print(f"formal benchmark step complete: {len(run_rows)} model/dataset runs", flush=True)
     return 0
 
