@@ -6,6 +6,7 @@
 
 - [项目状态与新对话交接](docs/PROJECT_STATUS.md)
 - [Windows 共创复现指南](docs/REPRODUCIBILITY.md)
+- [本地展示与 Web 开发指南](docs/WEB_SHOWCASE.md)
 - [数据来源与许可证](data/SOURCES.md)
 
 ## 当前状态
@@ -28,9 +29,9 @@
 - 已完成 formal-v1 扩大数据正式比较：140 张 calibration、690 张独立 test、44 条攻击、
   4 个模型共 121,440 条完整记录；AM-WAM 相对 WAM 的 Bit Accuracy 提高 0.188 个
   百分点、完整恢复率提高 1.604 个百分点，同时平均解码增加约 914 ms。
-- 当前研究内核和 CLI 可用；已完成研究型 Web 前端 MVP 和最小 FastAPI，支持单张图片、
-  单个模型的真实水印实验。部分概览数据仍保留 Mock 回退，完整实验管理后端和 Windows
-  安装包尚未完成。
+- 已完成 v0.2 本地展示平台：React 六个页面全部接入真实 API/冻结配置，FastAPI 支持
+  SQLite 历史、PNG 产物、详情查询、CSV 导出、独立嵌入/提取、manifest 下载与 SHA-256
+  校验；生产前端由 FastAPI 同端口提供，Windows 脚本可一键构建并启动。
 
 M2 的算法、参数和命令详见 [docs/M2_IMPLEMENTATION.md](docs/M2_IMPLEMENTATION.md)。
 本轮数据、校准结果和攻击结论见 [docs/M2_DEBUG_RESULTS.md](docs/M2_DEBUG_RESULTS.md)。
@@ -54,9 +55,9 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[research,data,dev]"
-python -m watermark_lab.cli status
-python -m watermark_lab.cli self-check --model dwt_dct
-python -m watermark_lab.cli protocol-status
+python -m watermark_lab status
+python -m watermark_lab self-check --model dwt_dct
+python -m watermark_lab protocol-status
 pytest
 ```
 
@@ -80,37 +81,29 @@ NumPy `<2.0`，因此不要直接安装到其他项目共用的全局 Python 环
 
 ## 本地 Web 实验平台
 
-最小 FastAPI 适配层支持单张图片、单个模型和单次攻击，并返回真实的 PSNR、SSIM、
-BER、Bit Accuracy 和 Detection 指标。启动 API 的 Python 环境决定当前可用模型；同一
-时间只需启动其中一个 API。
-
-DWT-DCT/LSB 使用已有轻量环境：
+展示模式只需一条命令：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[api]"
-.\.venv\Scripts\python.exe -m uvicorn watermark_lab.api.app:app --reload
+powershell -ExecutionPolicy Bypass -File scripts\start_showcase_windows.ps1
 ```
 
-WAM/AM-WAM 使用已有 WAM 环境：
+脚本默认使用 WAM GPU 环境，构建前端、启动 FastAPI 并打开 `http://127.0.0.1:8000`。
+TrustMark 展示使用：
 
 ```powershell
-.\.venv-wam\Scripts\python.exe -m pip install -e ".[api]"
-.\.venv-wam\Scripts\python.exe -m uvicorn watermark_lab.api.app:app --reload
+powershell -ExecutionPolicy Bypass -File scripts\start_showcase_windows.ps1 -Runtime trustmark
 ```
 
-另开一个终端启动前端：
+展示前完整验收：
 
 ```powershell
-cd frontend
-npm install
-npm run dev
+powershell -ExecutionPolicy Bypass -File scripts\verify_showcase_windows.ps1
 ```
 
-浏览器打开 `http://localhost:5173/experiment`。API 文档位于
-`http://127.0.0.1:8000/docs`。如需 TrustMark-Q，请在已有 `.venv-trustmark` 中安装
-`.[api]` 后从该环境启动 API。TrustMark-Q 与 WAM/AM-WAM 因固定依赖不同，继续使用
-隔离环境。API 不可用时前端保留 Mock 展示，但只有页面标记“真实 API 已连接”且实验
-成功返回时，结果才来自 Python 模型。
+API 文档位于 `http://127.0.0.1:8000/docs`。启动 API 的 Python 环境决定交互实验当前
+可用模型；全部正式比较数据始终从冻结结果加载。TrustMark-Q 与 WAM/AM-WAM 因固定依赖
+不同继续使用隔离环境。开发模式、持久化位置与完整接口见
+[本地展示与 Web 开发指南](docs/WEB_SHOWCASE.md)。
 
 ## 项目结构
 
@@ -118,8 +111,9 @@ npm run dev
 configs/                 实验配置
 docs/                    研究与工程文档
 frontend/                React/Vite/TypeScript 实验平台
+artifacts/web/           SQLite 与交互实验 PNG（Git 忽略）
 src/watermark_lab/
-  api/                   FastAPI 路由、请求模型与实验适配层
+  api/                   FastAPI、真实数据目录、持久化与模型编排
   attacks/               统一攻击实现
   core/                  类型、接口和注册表
   datasets/              数据清单和读取

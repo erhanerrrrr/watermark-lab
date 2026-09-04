@@ -1,0 +1,216 @@
+version: 1
+updated_at: "2026-09-04"
+
+project:
+  name: Watermark Lab
+  subtitle: 面向复合攻击与局部篡改的数字图像水印实验平台
+  stage: M5.2
+
+models:
+  lsb_reference:
+    display_name: LSB Reference
+    family: 空间域自检
+    description: 最低复杂度的端到端管线自检模型，不参与 formal-v1 正式排名。
+    detail: 逐像素最低有效位嵌入；速度快，但对压缩和编辑攻击不鲁棒。
+    robustness: 低
+    default_strength: 2.0
+    accent: "#64748b"
+  dwt_dct:
+    display_name: DWT-DCT
+    family: 传统频域
+    description: 小波变换结合离散余弦变换的可解释传统基线。
+    detail: 在 DWT 低频子带的 DCT 中频系数中盲嵌入 32 bit 消息。
+    robustness: 中
+    default_strength: 60.0
+    accent: "#0ea5e9"
+  trustmark_q:
+    display_name: TrustMark-Q
+    family: 深度学习
+    description: Adobe TrustMark Q 变体，全局深度水印对比基线。
+    detail: 使用 BCH-5 纠错编码；官方运行时与权重在独立环境中加载。
+    robustness: 高
+    default_strength: 1.0
+    accent: "#8b5cf6"
+  wam:
+    display_name: WAM
+    family: 前沿模型
+    description: Watermark Anything 官方 MIT 模型，支持空间检测与盲解码。
+    detail: 使用固定官方提交与权重，作为 AM-WAM 的核心前沿对比方法。
+    robustness: 很高
+    default_strength: 2.0
+    accent: "#10b981"
+  am_wam:
+    display_name: AM-WAM
+    family: 本项目改进
+    description: 加入盲几何同步与内容自适应强度控制的 WAM 改进方案。
+    detail: 显著改善旋转和透视攻击，但强模糊与额外解码耗时仍是明确边界。
+    robustness: 很高
+    default_strength: 2.0
+    accent: "#f59e0b"
+
+datasets:
+  - id: coco2017_val
+    display_name: COCO 2017 val
+    source: Microsoft COCO
+    license: COCO 数据集使用条款
+    debug_manifest: data/manifests/coco2017_val_debug10.csv
+    debug_root: data/raw/debug10/coco2017_val
+    calibration_manifest: data/manifests/coco2017_val_formal_cal40.csv
+    calibration_root: data/raw/formal_v1/coco2017_val/calibration
+    test_manifest: data/manifests/coco2017_val_formal_test200.csv
+    test_root: data/raw/formal_v1/coco2017_val/test
+  - id: div2k
+    display_name: DIV2K validation HR
+    source: ETH Zürich
+    license: 学术研究用途，遵循官方条款
+    debug_manifest: data/manifests/div2k_valid_hr_debug10.csv
+    debug_root: data/raw/debug10/div2k_valid_hr
+    calibration_manifest: data/manifests/div2k_formal_cal20.csv
+    calibration_root: data/raw/formal_v1/div2k/calibration
+    test_manifest: data/manifests/div2k_formal_test90.csv
+    test_root: data/raw/formal_v1/div2k/test
+  - id: diffusiondb_2m
+    display_name: DiffusionDB 2M
+    source: Hugging Face · poloclub/diffusiondb
+    license: CC0 元数据；图像遵循数据集说明
+    debug_manifest: data/manifests/diffusiondb_2m_debug10.csv
+    debug_root: data/raw/debug10/diffusiondb_2m
+    calibration_manifest: data/manifests/diffusiondb_2m_formal_cal40.csv
+    calibration_root: data/raw/formal_v1/diffusiondb_2m/calibration
+    test_manifest: data/manifests/diffusiondb_2m_formal_test200.csv
+    test_root: data/raw/formal_v1/diffusiondb_2m/test
+  - id: w_bench_det_inversion
+    display_name: W-Bench DET_INVERSION
+    source: Shilin-LU/W-Bench
+    license: 遵循 W-Bench 官方许可
+    debug_manifest: data/manifests/w_bench_det_inversion_debug10.csv
+    debug_root: data/raw/debug10/w_bench_det_inversion
+    calibration_manifest: data/manifests/w_bench_det_inversion_formal_cal40.csv
+    calibration_root: data/raw/formal_v1/w_bench_det_inversion/calibration
+    test_manifest: data/manifests/w_bench_det_inversion_formal_test200.csv
+    test_root: data/raw/formal_v1/w_bench_det_inversion/test
+
+interactive_attacks:
+  - id: none
+    display_name: 无攻击
+    description: 只验证嵌入与盲提取闭环。
+    parameter_label: 无参数
+    minimum: 0
+    maximum: 0
+    step: 1
+    default: 0
+    unit: ""
+  - id: jpeg
+    display_name: JPEG 压缩
+    description: 以指定质量因子重新编码图像。
+    parameter_label: JPEG 质量
+    minimum: 1
+    maximum: 100
+    step: 1
+    default: 80
+    unit: Q
+  - id: noise
+    display_name: 高斯噪声
+    description: 叠加零均值高斯噪声。
+    parameter_label: 标准差
+    minimum: 0
+    maximum: 0.2
+    step: 0.005
+    default: 0.01
+    unit: σ
+  - id: crop
+    display_name: 裁剪后缩放
+    description: 保留中心区域后缩放回原尺寸。
+    parameter_label: 保留比例
+    minimum: 0.1
+    maximum: 1
+    step: 0.05
+    default: 0.75
+    unit: ×
+  - id: resize
+    display_name: 缩放往返
+    description: 缩放到指定倍率后恢复原尺寸。
+    parameter_label: 缩放倍率
+    minimum: 0.1
+    maximum: 2
+    step: 0.05
+    default: 0.75
+    unit: ×
+  - id: rotate
+    display_name: 旋转
+    description: 旋转图像并保持原始画布尺寸。
+    parameter_label: 旋转角度
+    minimum: -30
+    maximum: 30
+    step: 1
+    default: 10
+    unit: °
+  - id: tamper
+    display_name: 局部篡改
+    description: 对指定比例的局部区域执行拼接替换。
+    parameter_label: 区域比例
+    minimum: 0.001
+    maximum: 0.9
+    step: 0.01
+    default: 0.1
+    unit: ratio
+  - id: compound
+    display_name: 组合攻击
+    description: 高斯模糊、对比度增强与 JPEG Q80 的固定组合。
+    parameter_label: 固定协议
+    minimum: 0
+    maximum: 0
+    step: 1
+    default: 0
+    unit: ""
+
+formal_snapshot:
+  suite_id: formal-v1-test
+  complete: true
+  records: 121440
+  expected_records: 121440
+  calibration_images: 140
+  test_images: 690
+  attack_cases: 44
+  target_psnr_db: 40.0
+  source: docs/FORMAL_RESULTS.md
+  models:
+    dwt_dct:
+      records: 30360
+      detected: 0.6865283267457181
+      bit_accuracy: 0.8494482872200263
+      complete_recovery: 0.5745718050065877
+      embed_psnr_db: 40.17470728705484
+      encode_ms: 130.68862507246408
+      decode_ms: 64.76844546442814
+    trustmark_q:
+      records: 30360
+      detected: 0.6467061923583662
+      bit_accuracy: 0.822177618577075
+      complete_recovery: 0.6404150197628459
+      embed_psnr_db: 40.122753033709714
+      encode_ms: 168.6694768115942
+      decode_ms: 87.30969339262323
+    wam:
+      records: 30360
+      detected: 0.9999011857707509
+      bit_accuracy: 0.993950716403162
+      complete_recovery: 0.9460144927536231
+      embed_psnr_db: 40.047148225371025
+      encode_ms: 73.12975521738841
+      decode_ms: 69.80734578721916
+    am_wam:
+      records: 30360
+      detected: 1.0
+      bit_accuracy: 0.9958292160737813
+      complete_recovery: 0.9620553359683794
+      embed_psnr_db: 39.986424498416824
+      encode_ms: 346.4245700000071
+      decode_ms: 983.667414499339
+  innovation:
+    bit_accuracy_gain_pp: 0.188
+    complete_recovery_gain_pp: 1.604
+    rotation_10_gain_pp: 49.42
+    perspective_heavy_gain_pp: 10.29
+    decode_overhead_ms: 913.86
+    unresolved: 强模糊 blur_r8 未改善；多水印 5% 小区域与低消息数过分裂仍待解决。

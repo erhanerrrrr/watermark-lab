@@ -192,3 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "run-manifest":
         return _run_manifest(args)
     raise AssertionError(f"unhandled command: {args.command}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

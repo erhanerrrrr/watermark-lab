@@ -1,6 +1,19 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { BarChart3, Beaker, Database, Gauge, Github, Menu, Network, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { useState } from 'react'
+import { NavLink, Outlet } from 'react-router-dom'
+import {
+  BarChart3,
+  Beaker,
+  Database,
+  Gauge,
+  Github,
+  Menu,
+  Network,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  X,
+} from 'lucide-react'
+import { useApi } from '../services/ApiContext'
 
 const navItems = [
   { to: '/', label: '总览 Dashboard', icon: Gauge, end: true },
@@ -11,18 +24,36 @@ const navItems = [
   { to: '/attacks', label: '攻击协议', icon: ShieldCheck },
 ]
 
+const connectionCopy = {
+  checking: '正在检查本地服务',
+  connected: '真实 API 已连接',
+  offline: '本地 API 未连接',
+}
+
 export function Layout() {
   const [open, setOpen] = useState(false)
+  const { connection, health, refresh } = useApi()
   return (
     <div className="app-shell">
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand"><div className="brand-mark"><Sparkles size={18} /></div><div><strong>Watermark Lab</strong><span>数字水印实验平台</span></div></div>
         <nav className="nav-list">{navItems.map(({ to, label, icon: Icon, end }) => <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icon size={18} /><span>{label}</span></NavLink>)}</nav>
-        <div className="sidebar-bottom"><div className="status-line"><span className="status-dot" />实验环境正常</div><a href="https://github.com/erhanerrrrr/watermark-lab" target="_blank" rel="noreferrer"><Github size={16} /> GitHub 仓库</a><small>v0.1 · Research Preview</small></div>
+        <div className="sidebar-bottom">
+          <div className="status-line"><span className={`status-dot ${connection}`} />{connectionCopy[connection]}</div>
+          <a href="https://github.com/erhanerrrrr/watermark-lab" target="_blank" rel="noreferrer"><Github size={16} /> GitHub 仓库</a>
+          <small>v{health?.version ?? '0.2'} · Local Showcase</small>
+        </div>
       </aside>
       {open && <button className="overlay" aria-label="关闭菜单" onClick={() => setOpen(false)} />}
       <main className="main-area">
-        <header className="topbar"><button className="menu-button" onClick={() => setOpen(!open)} aria-label="打开菜单">{open ? <X size={20} /> : <Menu size={20} />}</button><div className="breadcrumbs"><span>Watermark Lab</span><span className="crumb-separator">/</span><strong>研究控制台</strong></div><div className="topbar-actions"><div className="run-state"><span className="status-dot" />本地 Mock 模式</div><div className="avatar">研</div></div></header>
+        <header className="topbar">
+          <button className="menu-button" onClick={() => setOpen(!open)} aria-label="打开菜单">{open ? <X size={20} /> : <Menu size={20} />}</button>
+          <div className="breadcrumbs"><span>Watermark Lab</span><span className="crumb-separator">/</span><strong>研究控制台</strong></div>
+          <div className="topbar-actions">
+            <button className={`connection-state ${connection}`} onClick={() => void refresh()} title="重新检查后端"><span className={`status-dot ${connection}`} />{connectionCopy[connection]}<RefreshCw size={12} /></button>
+            <div className="avatar">研</div>
+          </div>
+        </header>
         <div className="page-content"><Outlet /></div>
       </main>
     </div>
@@ -39,4 +70,10 @@ export function StatusBadge({ children, tone = 'green' }: { children: React.Reac
 
 export function MetricCard({ label, value, hint, icon: Icon, accent = 'blue' }: { label: string; value: string; hint: string; icon: React.ElementType; accent?: string }) {
   return <div className="metric-card"><div className={`metric-icon ${accent}`}><Icon size={18} /></div><div className="metric-copy"><span>{label}</span><strong>{value}</strong><small>{hint}</small></div></div>
+}
+
+export function ApiRequired() {
+  const { connection, error, refresh } = useApi()
+  if (connection === 'checking') return <div className="page-state"><span className="status-dot checking" />正在读取本地研究数据…</div>
+  return <div className="page-state error-panel"><strong>本地 API 未连接</strong><span>{error || '请运行 Windows 展示启动脚本。'}</span><button className="secondary-button" onClick={() => void refresh()}><RefreshCw size={15} />重新连接</button></div>
 }

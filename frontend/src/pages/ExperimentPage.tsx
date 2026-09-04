@@ -1,44 +1,83 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { ImagePlus, Info, Play, RotateCcw, UploadCloud } from 'lucide-react'
-import { attacks, models } from '../mock/data'
-import { PageHeader, StatusBadge } from '../components/Layout'
-import { ApiUnavailableError, listModels, runExperiment } from '../services/api'
-import { storeRecentExperiment } from '../services/recentExperiment'
-import type { ApiModelInfo } from '../types'
+import { useNavigate } from 'react-router-dom'
+import { ApiRequired, PageHeader, StatusBadge } from '../components/Layout'
+import { runExperiment } from '../services/api'
+import { useApi } from '../services/ApiContext'
+
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 export function ExperimentPage() {
   const navigate = useNavigate()
-  const [selectedModel, setSelectedModel] = useState('am_wam')
+  const { catalog, connection, refreshExperiments } = useApi()
+  const [selectedModel, setSelectedModel] = useState('')
   const [selectedAttack, setSelectedAttack] = useState('jpeg')
   const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState('')
   const [message, setMessage] = useState('WATERMARK-LAB · 2026')
   const [strength, setStrength] = useState(2)
   const [attackParameter, setAttackParameter] = useState(80)
   const [running, setRunning] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
-  const [apiModels, setApiModels] = useState<ApiModelInfo[]>([])
+
   useEffect(() => {
-    listModels().then((items) => {
-      setApiModels(items)
-      setSelectedModel((current) => items.find((item) => item.id === current)?.available ? current : (items.find((item) => item.available)?.id ?? current))
-    }).catch(() => setApiModels([]))
-  }, [])
-  const parameterForApi = () => ['noise', 'crop', 'resize', 'tamper'].includes(selectedAttack) ? attackParameter / (selectedAttack === 'noise' ? 1000 : 100) : selectedAttack === 'rotate' ? attackParameter / 10 : attackParameter
+    if (!catalog) return
+    const preferred = catalog.models.find((model) => model.id === 'am_wam' && model.available)
+      ?? catalog.models.find((model) => model.available)
+    if (!selectedModel && preferred) {
+      setSelectedModel(preferred.id)
+      setStrength(preferred.default_strength)
+    }
+  }, [catalog, selectedModel])
+
+  useEffect(() => {
+    if (!file) { setPreview(''); return undefined }
+    const url = URL.createObjectURL(file)
+    setPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  const attack = useMemo(() => catalog?.interactive_attacks.find((item) => item.id === selectedAttack), [catalog, selectedAttack])
+  const model = catalog?.models.find((item) => item.id === selectedModel)
+  if (!catalog) return <ApiRequired />
+
+  const selectModel = (modelId: string) => {
+    setSelectedModel(modelId)
+    const selected = catalog.models.find((item) => item.id === modelId)
+    if (selected) setStrength(selected.default_strength)
+  }
+  const selectAttack = (attackId: string) => {
+    setSelectedAttack(attackId)
+    const selected = catalog.interactive_attacks.find((item) => item.id === attackId)
+    if (selected) setAttackParameter(selected.default)
+  }
+  const reset = () => {
+    const preferred = catalog.models.find((item) => item.id === 'am_wam' && item.available) ?? catalog.models.find((item) => item.available)
+    setSelectedModel(preferred?.id ?? '')
+    setStrength(preferred?.default_strength ?? 2)
+    setSelectedAttack('jpeg'); setAttackParameter(80); setMessage('WATERMARK-LAB · 2026'); setFile(null); setError('')
+  }
   const run = async () => {
-    setError(''); setNotice('')
+    setError('')
+    if (connection !== 'connected') { setError('本地 API 未连接。'); return }
     if (!file) { setError('请先上传一张图片。'); return }
+    if (file.size > MAX_UPLOAD_BYTES) { setError('图片不能超过 15 MB。'); return }
+    if (!message.trim()) { setError('水印消息不能为空。'); return }
+    if (!model?.available) { setError(model?.reason ?? '当前模型不可用。'); return }
     setRunning(true)
     try {
-      const result = await runExperiment({ image: file, model: selectedModel, message, strength, attack: selectedAttack, attackParameter: parameterForApi() })
-      storeRecentExperiment(result)
-      setNotice(`实验完成：Bit Accuracy ${(result.bit_accuracy * 100).toFixed(2)}%，PSNR ${result.embed_psnr_db?.toFixed(2) ?? '—'} dB`)
-      window.setTimeout(() => navigate('/results'), 700)
+      const result = await runExperiment({ image: file, model: selectedModel, message, strength, attack: selectedAttack, attackParameter, device: 'auto' })
+      await refreshExperiments()
+      navigate('/results', { state: { experimentId: result.id } })
     } catch (caught) {
-      const detail = caught instanceof Error ? caught.message : '实验失败，请检查后端日志。'
-      setError(caught instanceof ApiUnavailableError ? `${detail} 当前页面仍可继续作为 Mock 展示。` : detail)
+      setError(caught instanceof Error ? caught.message : '实验失败，请检查后端日志。')
     } finally { setRunning(false) }
   }
-  return <><PageHeader eyebrow="实验工作台" title="创建水印实验" description="配置一张输入图像、一个水印模型和攻击协议，调用本地 Python 后端完成单次实验。" action={<StatusBadge tone={apiModels.length ? 'green' : 'slate'}>{apiModels.length ? '真实 API 已连接' : 'Mock 回退模式'}</StatusBadge>} /><div className="experiment-layout"><div className="panel upload-panel"><div className="panel-heading"><div><span className="panel-kicker">Step 01</span><h2>输入图像</h2></div><ImagePlus size={18} className="muted" /></div><label className="dropzone"><input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /><UploadCloud size={28} /><strong>{file?.name || '拖拽图像到这里，或点击上传'}</strong><span>PNG / JPG / WebP · 至少 128×128，最大 15 MB</span></label><div className="upload-note"><Info size={15} /> 图片只发送到本机 FastAPI，不会离开当前设备。</div></div><div className="panel form-panel"><div className="panel-heading"><div><span className="panel-kicker">Step 02</span><h2>实验配置</h2></div><RotateCcw size={18} className="muted" /></div><label className="field-label">选择水印模型<select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>{models.map((model) => { const state = apiModels.find((item) => item.id === model.id); return <option key={model.id} value={model.id} disabled={state?.available === false}>{model.name} · {model.family}{state?.available === false ? '（当前 API 环境不可用）' : ''}</option> })}</select></label><label className="field-label">水印信息<textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} /></label><div className="field-grid"><label className="field-label">消息长度<select value="32" disabled><option>32 bit（文本自动哈希）</option></select></label><label className="field-label">嵌入强度<input type="number" value={strength} onChange={(e) => setStrength(Number(e.target.value))} min="0.1" step="0.1" /></label></div><label className="field-label">攻击协议<select value={selectedAttack} onChange={(e) => setSelectedAttack(e.target.value)}>{attacks.map((attack) => <option key={attack.id} value={attack.id}>{attack.name} · {attack.strength}</option>)}</select></label><div className="attack-params"><span>攻击参数</span><strong>{attacks.find((a) => a.id === selectedAttack)?.description}</strong><div className="range-line"><input type="range" min="0" max="100" value={attackParameter} onChange={(e) => setAttackParameter(Number(e.target.value))} /><output>{attackParameter}{selectedAttack === 'jpeg' ? '（质量）' : '%'}</output></div></div>{error && <div className="form-message error">{error}</div>}{notice && <div className="form-message success">{notice}</div>}<button className="primary-button run-button" onClick={run} disabled={running}><Play size={16} /> {running ? '真实模型运行中…' : '运行真实实验'}</button></div></div></>
+  return <>
+    <PageHeader eyebrow="实验工作台" title="创建真实水印实验" description="上传内容只在本机处理；结果、指标和三张 PNG 产物会持久保存。" action={<StatusBadge tone={connection === 'connected' ? 'green' : 'amber'}>{connection === 'connected' ? '真实 API 已连接' : 'API 未连接'}</StatusBadge>} />
+    <div className="experiment-layout">
+      <div className="panel upload-panel"><div className="panel-heading"><div><span className="panel-kicker">Step 01</span><h2>输入图像</h2></div><ImagePlus size={18} className="muted" /></div><label className={`dropzone ${preview ? 'has-preview' : ''}`}><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />{preview ? <img className="upload-preview" src={preview} alt="待处理图片预览" /> : <><UploadCloud size={28} /><strong>拖拽图片到这里，或点击上传</strong><span>PNG / JPG / WebP · 至少 128×128 · 最大 15 MB</span></>}</label>{file && <div className="file-summary"><strong>{file.name}</strong><span>{(file.size / 1024 / 1024).toFixed(2)} MB</span></div>}<div className="upload-note"><Info size={15} /> 图片不会上传至外部服务器；实验产物保存在本机 artifacts/web。</div></div>
+      <div className="panel form-panel"><div className="panel-heading"><div><span className="panel-kicker">Step 02</span><h2>模型与攻击配置</h2></div><button className="icon-button" onClick={reset} aria-label="重置实验配置" title="重置"><RotateCcw size={18} /></button></div><label className="field-label">水印模型<select value={selectedModel} onChange={(event) => selectModel(event.target.value)}>{catalog.models.map((item) => <option key={item.id} value={item.id} disabled={!item.available}>{item.display_name} · {item.family}{!item.available ? '（当前不可用）' : ''}</option>)}</select></label>{model?.reason && <div className="form-message warning">{model.reason}</div>}<label className="field-label">水印信息<textarea value={message} maxLength={4096} onChange={(event) => setMessage(event.target.value)} rows={3} /><small>{message.length}/4096 · 文本会确定性映射为 {model?.id === 'trustmark_q' ? '32' : '模型要求的'} bit 消息</small></label><div className="field-grid"><label className="field-label">嵌入强度<input type="number" value={strength} onChange={(event) => setStrength(Number(event.target.value))} min="0.01" max="1000" step="0.1" /></label><label className="field-label">执行设备<select value="auto" disabled><option>自动（优先 CUDA）</option></select></label></div><label className="field-label">交互攻击<select value={selectedAttack} onChange={(event) => selectAttack(event.target.value)}>{catalog.interactive_attacks.map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></label>{attack && <div className="attack-params"><span>{attack.parameter_label}</span><strong>{attack.description}</strong>{attack.minimum !== attack.maximum ? <div className="range-line"><input type="range" min={attack.minimum} max={attack.maximum} step={attack.step} value={attackParameter} onChange={(event) => setAttackParameter(Number(event.target.value))} /><output>{attackParameter} {attack.unit}</output></div> : <div className="fixed-parameter">固定配置，无可调参数</div>}</div>}{error && <div className="form-message error" role="alert">{error}</div>}<button className="primary-button run-button" onClick={() => void run()} disabled={running || connection !== 'connected' || !model?.available}><Play size={16} /> {running ? '模型运行中，请勿关闭页面…' : '运行并保存真实实验'}</button><p className="runtime-note">WAM/AM-WAM 首次加载权重会较慢；同一进程会复用模型实例。</p></div>
+    </div>
+  </>
 }

@@ -1,6 +1,6 @@
 # 项目状态与新对话交接
 
-更新时间：2026-09-03。研究总方针以根目录 `PROJECT_GUIDELINE.md` 为准，完整环境、
+更新时间：2026-09-04。研究总方针以根目录 `PROJECT_GUIDELINE.md` 为准，完整环境、
 权重、数据与结果恢复命令以 `docs/REPRODUCIBILITY.md` 为准。
 
 ## 1. 一句话现状
@@ -8,27 +8,29 @@
 项目已完成 M1–M4.2：DWT-DCT、TrustMark-Q、WAM 和改进方法 AM-WAM 已在统一接口下
 运行；几何同步、内容自适应强度和多水印软聚类均已实现并有固定实验。formal-v1 已固定
 140 张 calibration、690 张独立 test 和 44 条攻击，四模型正式比较已完成 121,440 条。
-研究型 Web 前端 MVP 和最小 FastAPI 已可用；完整实验管理后端、Windows 安装包、
-论文和答辩材料尚未完成。
+v0.2 本地展示平台已完成真实数据接入、持久化、导出与 Windows 一键启动，可用于课程
+现场演示；课程论文、答辩 PPT、演示视频和最终 Release 尚未完成。
 
 ## 2. 前后端现状
 
-当前是“研究内核 + CLI + 实验脚本 + Web MVP”，还不是完整的实验管理应用。
+当前是“研究内核 + CLI + 批量实验脚本 + 可展示的本地 Web 平台”。Web 覆盖单图交互
+实验；formal-v1 等长时批量任务仍通过可恢复 CLI 运行，不在 HTTP 请求中重复实现。
 
 | 层 | 状态 | 已有内容 | 下一步 |
 |---|---|---|---|
 | 算法内核 | 可用 | 统一模型接口、4 个研究模型、攻击与指标 | 继续做失败案例和论文消融 |
 | 实验后端 | 可用 | manifest、校准、可恢复运行器、统计与绘图 | 固化正式结果快照 |
 | CLI | 可用 | 状态、自检、协议和批量实验 | 保持为研发入口 |
-| HTTP API | MVP 可用 | 健康检查、模型状态、单图真实实验、内存历史 | 持久任务状态、文件管理 |
-| Web 前端 | MVP 可用 | React/Vite/TypeScript Dashboard、实验与结果页 | 扩大真实 API 覆盖、结果导出 |
-| Windows 打包 | 未开始 | 无 | Web 版稳定后再评估 PyInstaller/桌面壳 |
+| HTTP API | 展示版完成 | 真实 catalog、SQLite 历史、PNG 产物、实验/嵌入/提取、CSV、数据校验 | 后续可选长任务队列 |
+| Web 前端 | 展示版完成 | 六页真实 API、正式快照、实验、历史、产物、导出、错误状态 | 课程展示内容微调 |
+| Windows 启动 | 完成 | 一键构建、单端口服务、浏览器启动、四段验收脚本 | 最终 Release 验证 |
 
 目标调用链：
 
 ```text
 React 前端 -> FastAPI 后端 -> watermark_lab 研究内核
-                             -> 当前内存结果 / 后续 artifacts + SQLite 元数据
+                             -> artifacts/web PNG + SQLite 元数据
+                             -> 冻结配置 / manifest / formal-v1 结果
 ```
 
 API 层只编排现有 Python 接口，不复制模型算法。第一版面向单机 Windows 演示。
@@ -43,7 +45,8 @@ API 层只编排现有 Python 接口，不复制模型算法。第一版面向�
 | M4.1 AM-WAM | 完成 | 盲几何同步、内容自适应强度、消融与 held-out 几何测试 |
 | M4.2 多水印 | 完成 | 自适应软聚类、官方硬 DBSCAN 对比、2,560 条固定记录 |
 | M5.1 正式比较 | 完成 | 690 test×44 攻击×4 模型，共 121,440 条，完整性检查通过 |
-| M5.2 系统/论文 | 进行中 | Web/FastAPI MVP 已完成；持久化、报告和答辩材料待完成 |
+| M5.2 展示系统 | 完成 | v0.2 单端口 Web/API、真实数据源、SQLite/PNG、CSV、SHA-256、一键启动 |
+| M5.3 课程交付 | 进行中 | 课程论文、答辩 PPT、演示视频和最终 Release 待完成 |
 
 ## 4. 已确认研究结论
 
@@ -67,10 +70,11 @@ data/manifests/             Debug10 与 formal-v1 固定清单、尺寸和 SHA-2
 docs/                       实现、结果、复现和交接文档
 scripts/                    数据恢复、校准、可恢复运行、统计和绘图入口
 src/watermark_lab/models/   DWT-DCT、TrustMark-Q、WAM、AM-WAM
-src/watermark_lab/api/      单图真实实验 FastAPI 适配层
+src/watermark_lab/api/      FastAPI、展示目录、SQLite/PNG 持久化与模型编排
 src/watermark_lab/innovations/
                             几何同步、内容自适应和多水印软聚类
 frontend/                   React/Vite/TypeScript 研究型 Dashboard
+artifacts/web/              本地交互实验数据库与图片产物（Git 忽略）
 tests/                      单元、协议、模型与恢复运行测试
 ```
 
@@ -85,32 +89,21 @@ tests/                      单元、协议、模型与恢复运行测试
 2. 需要共享原始结果时，打包 `results/formal_v1/` 并记录 SHA-256，不提交 Git；
 3. 不在 formal-v1 test 上继续调参；新候选剪枝方案另建 calibration/test 协议。
 
-### P1：系统后端
+### P1：展示平台维护
 
-FastAPI MVP 已提供 `GET /api/health`、`GET /api/models`、`GET /api/experiments` 和
-`POST /api/experiments/single`。下一步补充：
+1. 展示前运行 `scripts/verify_showcase_windows.ps1`；
+2. 用 `scripts/start_showcase_windows.ps1` 启动单端口生产展示；
+3. 不把 `artifacts/web` 的交互结果混写成 formal-v1 论文统计；
+4. 若新增长时 Web 批量实验，再设计显式任务队列，当前不提前引入 Redis/Celery。
 
-- `POST /api/watermarks/embed`、`POST /api/watermarks/decode`；
-- `GET /api/experiments/{id}`；
-- `GET /api/experiments/{id}/artifacts`。
+### P2：课程交付
 
-后续持久化使用本机任务执行器和 SQLite/JSON，不提前引入 Redis/Celery。模型实例继续
-复用，耗时任务不能阻塞 HTTP 请求线程。
-
-### P2：Web 前端
-
-React、Vite、TypeScript MVP 已提供环境状态、单图实验、固定攻击配置、模型/数据集
-概览和结果展示。下一步将剩余 Mock 概览接入真实统计，并补充持久任务历史和结果导出。
-前端只读取后端统计产物，不重写指标算法。
-
-### P3：交付
-
-Windows 一键启动脚本、可选安装包、课程报告、PPT、演示视频、引用/许可证清单、最终
-Release 与结果压缩包 SHA-256。
+课程论文、答辩 PPT、演示视频、引用/许可证清单、最终 GitHub Release 与正式结果压缩包
+SHA-256。Web 展示流程见 `docs/WEB_SHOWCASE.md`。
 
 ## 7. 风险与边界
 
-1. Web/FastAPI MVP 可运行不等于完整实验管理系统已完成。
+1. v0.2 Web 已覆盖现场单图实验，但 formal-v1 批量运行仍属于 CLI 研究工作流。
 2. 运行时间只在相同硬件/环境内比较；本次 WAM/AM-WAM 用 GPU，传统方法与 TrustMark
    用 CPU，不能把四者耗时画成统一硬件排名。
 3. formal-v1 test 已冻结，看到结果后不得回改强度、阈值、样本或攻击；改进必须另建
@@ -129,13 +122,13 @@ Release 与结果压缩包 SHA-256。
 4. docs/FORMAL_RESULTS.md
 5. 与任务相关的 M2/M3/M4 实现和结果文档
 
-已完成 M1–M4.2，以及 formal-v1 的 121,440 条正式比较和统计图。不要覆盖冻结
+已完成 M1–M4.2、formal-v1 的 121,440 条正式比较和 v0.2 本地展示平台。不要覆盖冻结
 manifest、攻击、校准或 held-out 配置，不要把 Debug10 写成最终结论。开始修改前检查
-git status；修改后运行 ruff check . 和 pytest。当前任务是：<在此写明任务>。
+git status；修改后运行 scripts/verify_showcase_windows.ps1。当前任务是：<在此写明任务>。
 ```
 
 ## 9. 最合适的开发入口
 
-系统开发从 `src/watermark_lab/api/` 和 `frontend/` 继续，优先实现持久任务、独立
-`embed/decode` 端点和结果导出；若先写论文，则直接使用 `docs/FORMAL_RESULTS.md`
-中的正式数字和 `results/formal_v1/figures/` 中的图。
+系统展示从 `docs/WEB_SHOWCASE.md` 进入；若写论文，直接使用 `docs/FORMAL_RESULTS.md`
+中的正式数字和 `results/formal_v1/figures/` 中的图。后续工程扩展优先考虑长任务进度、
+实验删除/归档和 Release 打包，但这些不是当前现场展示的阻塞项。

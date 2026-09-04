@@ -1,7 +1,32 @@
+import { useMemo, useState } from 'react'
 import { ArrowRight, Layers, ShieldAlert, SlidersHorizontal } from 'lucide-react'
-import { attacks } from '../mock/data'
-import { PageHeader, StatusBadge } from '../components/Layout'
+import { ApiRequired, PageHeader, StatusBadge } from '../components/Layout'
+import { useApi } from '../services/ApiContext'
+import type { AttackCaseInfo } from '../types'
+
+type CategoryFilter = 'all' | AttackCaseInfo['category']
+
+const categoryName = { control: '控制', single: '单项攻击', compound: '组合攻击' }
+
+function formatStep(step: AttackCaseInfo['pipeline'][number]): string {
+  const parameters = Object.entries(step.parameters)
+    .map(([key, value]) => `${key}=${String(value)}`)
+    .join(', ')
+  return parameters ? `${step.name} (${parameters})` : step.name
+}
 
 export function AttacksPage() {
-  return <><PageHeader eyebrow="鲁棒性评估" title="攻击协议" description="通过统一的攻击算子模拟图像发布、传输和编辑过程。" action={<StatusBadge tone="blue">wm-course-v1 · seed 42</StatusBadge>} /><section className="attack-banner"><div className="attack-banner-icon"><ShieldAlert size={24} /></div><div><strong>协议已锁定</strong><p>正式实验使用 44 条攻击记录，包括 35 条单项、8 条组合和 1 条控制样例。</p></div><div className="protocol-count"><strong>44</strong><span>cases</span></div></section><section className="attack-grid">{attacks.map((attack, index) => <article className="panel attack-card" key={attack.id}><div className="attack-number">{String(index + 1).padStart(2, '0')}</div><div className="attack-card-icon"><SlidersHorizontal size={18} /></div><div className="attack-card-copy"><div><h2>{attack.name}</h2><StatusBadge tone={attack.category === '复合攻击' ? 'amber' : 'slate'}>{attack.category}</StatusBadge></div><p>{attack.description}</p><span className="attack-strength">参数：{attack.strength}</span></div><ArrowRight size={17} className="muted" /></article>)}</section><section className="panel protocol-panel"><div className="panel-heading"><div><span className="panel-kicker">执行顺序</span><h2>图像攻击流水线</h2></div><Layers size={18} className="muted" /></div><div className="flow-row"><span>原始图像</span><ArrowRight size={16} /><span>嵌入水印</span><ArrowRight size={16} /><span className="flow-active">攻击协议</span><ArrowRight size={16} /><span>提取与评估</span></div></section></>
+  const { catalog } = useApi()
+  const [filter, setFilter] = useState<CategoryFilter>('all')
+  const cases = useMemo(() => catalog?.protocol.cases.filter((item) => filter === 'all' || item.category === filter) ?? [], [catalog, filter])
+  if (!catalog) return <ApiRequired />
+
+  const counts = Object.fromEntries(['control', 'single', 'compound'].map((category) => [category, catalog.protocol.cases.filter((item) => item.category === category).length]))
+  return <>
+    <PageHeader eyebrow="鲁棒性评估" title="冻结攻击协议" description="以下 44 条流水线直接来自 configs/attacks.yaml，不是前端演示数据。" action={<StatusBadge tone="blue">{catalog.protocol.id} v{catalog.protocol.version} · seed {catalog.protocol.seed}</StatusBadge>} />
+    <section className="attack-banner"><div className="attack-banner-icon"><ShieldAlert size={24} /></div><div><strong>正式协议已锁定</strong><p>共 {catalog.protocol.cases.length} 条：{counts.control} 条控制、{counts.single} 条单项、{counts.compound} 条组合；正式 test 结果不可回调参数。</p></div><div className="protocol-count"><strong>{catalog.protocol.cases.length}</strong><span>cases</span></div></section>
+    <div className="filter-bar" aria-label="攻击类别筛选">{(['all', 'control', 'single', 'compound'] as const).map((category) => <button key={category} className={`filter-button ${filter === category ? 'active' : ''}`} onClick={() => setFilter(category)}>{category === 'all' ? '全部' : categoryName[category]}{category !== 'all' && ` ${counts[category]}`}</button>)}</div>
+    <section className="attack-grid">{cases.map((attack, index) => <article className="panel attack-card" key={attack.id}><div className="attack-number">{String(index + 1).padStart(2, '0')}</div><div className="attack-card-icon"><SlidersHorizontal size={18} /></div><div className="attack-card-copy"><div><h2>{attack.id}</h2><StatusBadge tone={attack.category === 'compound' ? 'amber' : attack.category === 'control' ? 'blue' : 'slate'}>{categoryName[attack.category]}</StatusBadge></div><p>{attack.pipeline.map(formatStep).join(' → ')}</p><span className="attack-strength">流水线长度：{attack.pipeline.length}</span></div></article>)}</section>
+    <section className="panel protocol-panel"><div className="panel-heading"><div><span className="panel-kicker">执行顺序</span><h2>统一评估流水线</h2></div><Layers size={18} className="muted" /></div><div className="flow-row"><span>固定 manifest</span><ArrowRight size={16} /><span>公平 PSNR 校准</span><ArrowRight size={16} /><span className="flow-active">冻结攻击</span><ArrowRight size={16} /><span>盲提取与统计</span></div></section>
+  </>
 }

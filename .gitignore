@@ -1,6 +1,7 @@
 .venv/
 .venv-trustmark/
 .venv-wam/
+.venv-wam-gpu/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -15,8 +16,13 @@ data/cache/
 checkpoints/
 outputs/
 results/
+artifacts/
 third_party/
 tmp/
+
+# Local document-rendering and visual QA outputs.
+qa_*/
+soffice.exe
 
 *.onnx
 *.pth
