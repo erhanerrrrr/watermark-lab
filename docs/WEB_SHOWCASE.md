@@ -57,7 +57,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_showcase_windows.ps1
 2. 在“模型库”说明当前运行时与四种正式对比方法；
 3. 在“攻击协议”展示 44 条冻结流水线，而不是只展示概念分类；
 4. 在“数据集”展示 manifest 数量，并点击 SHA-256 校验；
-5. 在“水印实验”上传一张至少 128×128 的图片，优先演示 AM-WAM + 10° 旋转；
+5. 在“水印实验”上传一张至少 128×128 的图片，优先演示 Budget-WAM + 10° 旋转，再用 AM-WAM 作为旧门控对照；
 6. 在“实验结果”展示三张产物、消息比特、PSNR/SSIM/BER/Bit Accuracy，并下载 CSV；
 7. 在“实验结果”补充展示 clean 正负检测：默认 AM-WAM 规则有 6.81% FPR，冻结阈值后
    test FPR 为 1.74%，避免把正样本恢复率误称为低误报检测；

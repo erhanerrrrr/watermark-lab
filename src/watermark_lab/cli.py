@@ -44,7 +44,7 @@ def _status() -> int:
         state = "ready" if spec.ready else "planned"
         if spec.name == "trustmark_q" and not trustmark_package_available():
             state = "adapter"
-        if spec.name in {"wam", "am_wam"} and not (
+        if spec.name in {"wam", "am_wam", "budget_wam"} and not (
             wam_runtime_available() and wam_assets_available()
         ):
             state = "adapter"
@@ -137,7 +137,9 @@ def build_parser() -> argparse.ArgumentParser:
     check = subparsers.add_parser("self-check", help="run a small end-to-end pipeline check")
     check.add_argument(
         "--model",
-        choices=("lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam"),
+        choices=(
+            "lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam", "budget_wam"
+        ),
         default="lsb_reference",
         help="lightweight model to validate",
     )
@@ -161,7 +163,9 @@ def build_parser() -> argparse.ArgumentParser:
         "run-manifest", help="run one model on a fixed manifest and attack protocol"
     )
     experiment.add_argument(
-        "--model", required=True, choices=("dwt_dct", "trustmark_q", "wam", "am_wam")
+        "--model",
+        required=True,
+        choices=("dwt_dct", "trustmark_q", "wam", "am_wam", "budget_wam"),
     )
     experiment.add_argument("--strength", type=float, help="fixed embedding strength")
     experiment.add_argument("--manifest", required=True)

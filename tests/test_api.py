@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from watermark_lab.api.app import create_app
+from watermark_lab.api.service import read_rgb_image
 
 
 def _image_bytes(size: int = 256) -> bytes:
@@ -19,6 +20,23 @@ def _image_bytes(size: int = 256) -> bytes:
     stream = io.BytesIO()
     image.save(stream, format="PNG")
     return stream.getvalue()
+
+
+def test_read_rgb_image_maps_pillow_decompression_bomb_to_value_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Bomb:
+        size = (128, 128)
+
+        def __enter__(self):
+            raise Image.DecompressionBombError("too many pixels")
+
+        def __exit__(self, *_args):
+            return False
+
+    monkeypatch.setattr("watermark_lab.api.service.Image.open", lambda *_args: Bomb())
+    with pytest.raises(ValueError, match="无法读取图片"):
+        read_rgb_image(b"fake")
 
 
 @pytest.fixture

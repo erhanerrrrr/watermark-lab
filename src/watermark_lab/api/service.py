@@ -55,7 +55,11 @@ def read_rgb_image(payload: bytes) -> ImageArray:
             if width < 128 or height < 128:
                 raise ValueError("图片尺寸至少为 128×128")
             image = np.asarray(source.convert("RGB"), dtype=np.uint8)
-    except (UnidentifiedImageError, OSError) as error:
+    # Pillow raises ``DecompressionBombError`` for images above its own safety
+    # threshold before we can apply the API's 25-million-pixel limit.  Treat it
+    # as an invalid upload so clients receive the same actionable 422 response
+    # as other malformed images instead of an unhandled 500.
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as error:
         raise ValueError("无法读取图片，请上传有效的 PNG/JPEG/WebP 文件") from error
     return np.ascontiguousarray(image)
 

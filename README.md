@@ -82,7 +82,7 @@ M4.2 的算法与边界见
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[research,data,dev]"
+python -m pip install -e ".[research,data,api,dev]"
 python -m watermark_lab status
 python -m watermark_lab self-check --model dwt_dct
 python -m watermark_lab protocol-status
