@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   BarChart3,
   Beaker,
@@ -32,7 +32,11 @@ const connectionCopy = {
 
 export function Layout() {
   const [open, setOpen] = useState(false)
-  const { connection, health, refresh } = useApi()
+  const { pathname, hash } = useLocation()
+  const { connection, health, refresh, lastSyncedAt } = useApi()
+  useEffect(() => {
+    if (!hash) window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname, hash])
   return (
     <div className="app-shell">
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
@@ -50,7 +54,7 @@ export function Layout() {
           <button className="menu-button" onClick={() => setOpen(!open)} aria-label="打开菜单">{open ? <X size={20} /> : <Menu size={20} />}</button>
           <div className="breadcrumbs"><span>Watermark Lab</span><span className="crumb-separator">/</span><strong>研究控制台</strong></div>
           <div className="topbar-actions">
-            <button className={`connection-state ${connection}`} onClick={() => void refresh()} title="重新检查后端"><span className={`status-dot ${connection}`} />{connectionCopy[connection]}<RefreshCw size={12} /></button>
+            <button className={`connection-state ${connection}`} onClick={() => void refresh()} aria-label="刷新服务状态与模型目录" title={lastSyncedAt ? `目录同步于 ${lastSyncedAt.toLocaleTimeString()}，点击重新同步` : '重新同步服务状态与模型目录'}><span className={`status-dot ${connection}`} />{connectionCopy[connection]}<RefreshCw size={12} /></button>
             <div className="avatar">研</div>
           </div>
         </header>

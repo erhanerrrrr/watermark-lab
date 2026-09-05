@@ -43,3 +43,25 @@ Debug10 文件。选择规则由 `scripts/prepare_formal_datasets.py` 固定，�
 
 正式子集仍遵循上表各原始数据集的许可证和使用条款。原图不进入 Git；八个
 `*_formal_*.csv` manifest 进入版本控制，实验时强制逐文件校验 SHA-256。
+
+## geometry-v3 新图像子集
+
+Budget-WAM 的独立验证额外选择四来源各 12 张 calibration 和 20 张 test，共 128 张。
+`scripts/prepare_geometry_v3_data.py` 按固定文件顺序选样，排除项目历史清单中的
+文件名和 SHA-256，再检查新子集内部与 calibration/test 之间无哈希重叠。
+
+| 来源 | calibration | test | 与旧数据的区别 |
+|---|---:|---:|---|
+| COCO 2017 val | 12 | 20 | 排除所有旧 Debug/formal 图像 |
+| DIV2K train HR | 12 | 20 | validation 已用尽，改用未使用的 train 源文件 |
+| DiffusionDB 2M | 12 | 20 | 固定 part-000001 内未使用的文件 |
+| W-Bench DET_INVERSION_1K | 12 | 20 | 固定 revision 内未使用的索引 |
+
+来源 revision、旧文件排除清单保存在 `configs/geometry_v3_sources.json`，逐图
+清单为 `data/manifests/geometry_v3_*_{calibration,test}.csv`。文件在嵌入前等比
+缩到最长边不超过 1024；原始下载文件的哈希与处理后像素哈希分别记录。
+这里的隔离指项目实验历史，不宣称与 WAM 预训练数据隔离。正负样本使用同一
+来源图像的嵌入/未嵌入版本，统计以图像为单位，不把正负版本当独立图像翻倍。
+
+本轮继续遵循各原始数据源的许可。完整协议与复现命令见
+[GEOMETRY_V3_IMPLEMENTATION.md](../docs/GEOMETRY_V3_IMPLEMENTATION.md)。

@@ -29,6 +29,8 @@ export interface ApiModelInfo {
   default_strength: number
   accent: string
   available: boolean
+  execution_backend?: 'local' | 'isolated'
+  runtime_label?: string
   reason?: string | null
   formal_metrics?: FormalModelMetrics | null
 }
@@ -200,4 +202,119 @@ export interface DatasetVerification {
   missing: string[]
   mismatched: string[]
   valid: boolean
+}
+
+export interface ResearchEvidenceRow {
+  dataset: string
+  attack: string
+  category: string
+  images: number
+  paired_records: number
+  models: {
+    id: string
+    bit_accuracy: number
+    complete_recovery: number
+    embed_psnr_db: number
+    decode_ms: number
+  }[]
+  comparison: {
+    bit_accuracy_gain_pp: number
+    recovery_gain_pp: number
+    recovery_ci95_pp: [number, number]
+    rescued: number
+    regressed: number
+    both_recovered: number
+    both_failed: number
+    decode_overhead_ms: number
+  }
+}
+
+export interface ResearchEvidence {
+  version: number
+  suite_id: string
+  source: string
+  records: number
+  images: number
+  attacks: number
+  generated_at: string
+  bootstrap_iterations: number
+  notes: string[]
+  datasets: { id: string; label: string; images: number }[]
+  rows: ResearchEvidenceRow[]
+  sensitivity: {
+    excluded_attack: string
+    images: number
+    paired_records: number
+    recovery_gain_pp: number
+    recovery_ci95_pp: [number, number]
+  }[]
+  provenance: { path: string; sha256: string }[]
+}
+
+export interface GeometryPair {
+  baseline: string
+  image_units: number
+  paired_records: number
+  recovery_gain_pp: number
+  ci95_pp: [number, number]
+  rescued: number
+  regressed: number
+  budget_recovery: number
+  baseline_recovery: number
+}
+
+export interface GeometryEvidence {
+  suite_id: 'geometry-v3'
+  complete: true
+  generated_at: string
+  calibration_images: number
+  test_images: number
+  attack_cases: number
+  negative_attack_cases: number
+  max_input_side: number
+  positive_records_per_method: number
+  negative_records_per_method: number
+  policy: { max_candidates: number; detection_fraction_threshold: number }
+  calibration_targets_met: boolean
+  test_criteria: {
+    recovery_tolerance_pp: number
+    recovery_point_target_met: boolean
+    noninferiority_ci_supported: boolean
+    candidate_target_met: boolean
+  }
+  methods: {
+    method: string
+    label: string
+    complete_recovery: number
+    bit_accuracy: number
+    mean_candidates: number
+    mean_psnr_db: number
+    threshold: number
+    tpr: number
+    fpr: number
+    false_positive_images: number
+    negative_images: number
+    false_positive_image_ci95: [number, number]
+  }[]
+  paired: GeometryPair[]
+  by_family: (GeometryPair & { family: string })[]
+  by_dataset: (GeometryPair & { dataset: string })[]
+  decision_audit: {
+    stop_reason: string
+    records: number
+    mean_candidates: number
+    complete_recovery: number
+    rescued_vs_full_best: number
+    regressed_vs_full_best: number
+  }[]
+  timing: {
+    image_units: number
+    measured_conditions: number
+    repetitions: number
+    device: string
+    live_replay_bitwise_verified: boolean
+    methods: { method: string; runs: number; mean_ms: number; p50_ms: number; p95_ms: number; mean_candidates: number; peak_cuda_allocated_mb: number }[]
+  }
+  notes: string[]
+  provenance: { path: string; sha256: string }[]
 }

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import logging
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Any, NoReturn
 
@@ -20,6 +22,8 @@ from watermark_lab.api.catalog import (
     manifest_path,
     verify_datasets,
 )
+from watermark_lab.api.geometry_research import GeometryEvidence, load_geometry_evidence
+from watermark_lab.api.research import ResearchEvidence, load_research_evidence
 from watermark_lab.api.schemas import (
     ApiModelInfo,
     CatalogResponse,
@@ -38,22 +42,40 @@ from watermark_lab.api.service import (
     run_single_experiment,
 )
 from watermark_lab.api.storage import ExperimentStore, project_root
+from watermark_lab.api.trustmark_runtime import (
+    TrustMarkWorkerClient,
+    create_trustmark_worker,
+    trustmark_mode,
+)
 from watermark_lab.core.registry import list_model_specs
+from watermark_lab.models.budget_wam import load_budget_policy
 from watermark_lab.models.wam_adapter import wam_assets_available, wam_runtime_available
 
 
-def _runtime_availability(model_id: str) -> tuple[bool, str | None]:
-    if model_id == "trustmark_q" and importlib.util.find_spec("trustmark") is None:
-        return False, "当前环境未安装 TrustMark；请使用 .venv-trustmark 启动 API"
-    if model_id in {"wam", "am_wam"}:
+def _runtime_availability(
+    model_id: str, worker: TrustMarkWorkerClient | None = None
+) -> tuple[bool, str | None]:
+    if model_id == "trustmark_q":
+        if trustmark_mode() == "disabled":
+            return False, "TrustMark 已通过运行配置停用"
+        if worker is not None:
+            return worker.availability()
+        if importlib.util.find_spec("trustmark") is None:
+            return False, "当前服务未安装 TrustMark；请启用或配置 TrustMark 独立环境"
+    if model_id in {"wam", "am_wam", "budget_wam"}:
         if not wam_runtime_available():
             return False, "当前环境未安装 WAM runtime；请使用 .venv-wam-gpu 启动 API"
         if not wam_assets_available():
             return False, "缺少 WAM 官方源码或权重"
+        if model_id == "budget_wam":
+            try:
+                load_budget_policy()
+            except RuntimeError as error:
+                return False, str(error)
     return True, None
 
 
-def _api_models() -> list[ApiModelInfo]:
+def _api_models(worker: TrustMarkWorkerClient | None = None) -> list[ApiModelInfo]:
     showcase = load_showcase_config()
     presentation = showcase["models"]
     formal_models = formal_snapshot()["models"]
@@ -61,7 +83,17 @@ def _api_models() -> list[ApiModelInfo]:
     for spec in list_model_specs():
         if spec.name not in SUPPORTED_API_MODELS:
             continue
-        available, reason = _runtime_availability(spec.name)
+        available, reason = _runtime_availability(spec.name, worker)
+        isolated = spec.name == "trustmark_q" and worker is not None
+        if isolated:
+            device = worker.runtime_info.get("device")
+            runtime_label = "TrustMark 独立进程" + (f" · {device.upper()}" if device else "")
+        elif spec.name in {"wam", "am_wam", "budget_wam"}:
+            runtime_label = "主服务 · 自动选择设备"
+        elif spec.name == "trustmark_q":
+            runtime_label = "主服务 · TrustMark"
+        else:
+            runtime_label = "主服务 · CPU"
         metadata = presentation[spec.name]
         items.append(
             ApiModelInfo(
@@ -76,6 +108,8 @@ def _api_models() -> list[ApiModelInfo]:
                 default_strength=metadata["default_strength"],
                 accent=metadata["accent"],
                 available=available and spec.ready,
+                execution_backend="isolated" if isolated else "local",
+                runtime_label=runtime_label,
                 reason=reason,
                 formal_metrics=formal_models.get(spec.name),
             )
@@ -118,16 +152,41 @@ def create_app(
     *,
     storage_dir: Path | None = None,
     frontend_dir: Path | None = None,
+    trustmark_worker: TrustMarkWorkerClient | None = None,
 ) -> FastAPI:
     store = ExperimentStore(storage_dir)
     frontend = (frontend_dir or project_root() / "frontend" / "dist").resolve()
+    worker = trustmark_worker if trustmark_worker is not None else create_trustmark_worker()
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI):
+        try:
+            if worker is not None:
+                try:
+                    await run_in_threadpool(worker.ensure_ready)
+                except RuntimeError as error:
+                    logging.getLogger(__name__).warning("TrustMark worker unavailable: %s", error)
+            yield
+        finally:
+            if worker is not None:
+                await run_in_threadpool(worker.close)
+
     application = FastAPI(
         title="Watermark Lab API",
         version=__version__,
         description="Persistent local API for watermark experiments and the research showcase.",
+        lifespan=lifespan,
     )
     application.state.experiment_store = store
     application.state.frontend_dir = frontend
+    application.state.trustmark_worker = worker
+
+    @application.middleware("http")
+    async def refresh_live_api(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
 
     origins = os.environ.get(
         "WATERMARK_LAB_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
@@ -151,7 +210,7 @@ def create_app(
 
     @application.get("/api/models", response_model=list[ApiModelInfo])
     def models() -> list[ApiModelInfo]:
-        return _api_models()
+        return _api_models(worker)
 
     @application.get("/api/catalog", response_model=CatalogResponse)
     def catalog() -> CatalogResponse:
@@ -160,7 +219,7 @@ def create_app(
             version=configured["version"],
             updated_at=configured["updated_at"],
             project=configured["project"],
-            models=_api_models(),
+            models=_api_models(worker),
             datasets=dataset_catalog(),
             protocol=attack_catalog(),
             interactive_attacks=configured["interactive_attacks"],
@@ -171,6 +230,39 @@ def create_app(
     async def datasets_verify() -> list[DatasetVerification]:
         reports = await run_in_threadpool(verify_datasets)
         return [DatasetVerification.model_validate(report) for report in reports]
+
+    @application.get("/api/research/evidence", response_model=ResearchEvidence)
+    def research_evidence() -> ResearchEvidence:
+        try:
+            return load_research_evidence()
+        except RuntimeError as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
+
+    @application.get("/api/research/evidence/export.json")
+    def research_evidence_export() -> Response:
+        evidence = research_evidence()
+        return Response(
+            evidence.model_dump_json(indent=2),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": 'attachment; filename="formal-v1-evidence.json"'
+            },
+        )
+
+    @application.get("/api/research/geometry-v3", response_model=GeometryEvidence)
+    def geometry_evidence() -> GeometryEvidence:
+        try:
+            return load_geometry_evidence()
+        except RuntimeError as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
+
+    @application.get("/api/research/geometry-v3/export.json")
+    def geometry_evidence_export() -> Response:
+        return Response(
+            geometry_evidence().model_dump_json(indent=2),
+            media_type="application/json",
+            headers={"Content-Disposition": 'attachment; filename="geometry-v3-evidence.json"'},
+        )
 
     @application.get("/api/datasets/{dataset_id}/manifest/{split}", name="dataset_manifest")
     def dataset_manifest(dataset_id: str, split: str) -> FileResponse:
@@ -235,7 +327,7 @@ def create_app(
     ) -> ExperimentDetail:
         if not image.content_type or not image.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="只接受图片文件")
-        available, reason = _runtime_availability(model)
+        available, reason = _runtime_availability(model, worker)
         if not available:
             raise HTTPException(status_code=503, detail=reason)
         try:
@@ -249,6 +341,7 @@ def create_app(
                 attack_name=attack,
                 attack_parameter=attack_parameter,
                 device=device,
+                trustmark_worker=worker,
             )
             payload = completed.record.model_dump(mode="json")
             await run_in_threadpool(store.save_experiment, payload, completed.images)
@@ -267,7 +360,7 @@ def create_app(
     ) -> EmbedResponse:
         if not image.content_type or not image.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="只接受图片文件")
-        available, reason = _runtime_availability(model)
+        available, reason = _runtime_availability(model, worker)
         if not available:
             raise HTTPException(status_code=503, detail=reason)
         try:
@@ -279,6 +372,7 @@ def create_app(
                 message=message,
                 strength=strength,
                 device=device,
+                trustmark_worker=worker,
             )
             await run_in_threadpool(store.save_operation_image, operation_id, "embedded", embedded)
             url = str(
@@ -305,7 +399,7 @@ def create_app(
     ) -> DecodeResponse:
         if not image.content_type or not image.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="只接受图片文件")
-        available, reason = _runtime_availability(model)
+        available, reason = _runtime_availability(model, worker)
         if not available:
             raise HTTPException(status_code=503, detail=reason)
         try:
@@ -317,6 +411,7 @@ def create_app(
                 expected_message=expected_message,
                 strength=strength,
                 device=device,
+                trustmark_worker=worker,
             )
         except Exception as error:
             return _raise_api_error(error)
@@ -353,7 +448,11 @@ def create_app(
             or not (frontend / "index.html").is_file()
         ):
             raise HTTPException(status_code=404, detail="资源不存在")
-        return FileResponse(frontend / "index.html", media_type="text/html")
+        return FileResponse(
+            frontend / "index.html",
+            media_type="text/html",
+            headers={"Cache-Control": "no-cache"},
+        )
 
     return application
 

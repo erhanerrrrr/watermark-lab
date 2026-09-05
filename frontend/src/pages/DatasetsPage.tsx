@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { CheckCircle2, Database, Download, FileCheck2, LoaderCircle, XCircle } from 'lucide-react'
 import { ApiRequired, PageHeader, StatusBadge } from '../components/Layout'
 import { manifestUrl, verifyDatasets } from '../services/api'
@@ -21,7 +22,8 @@ export function DatasetsPage() {
   const found = catalog.datasets.reduce((sum, dataset) => sum + dataset.found_images, 0)
   const expected = catalog.datasets.reduce((sum, dataset) => sum + dataset.expected_images, 0)
   return <>
-    <PageHeader eyebrow="数据资产" title="数据集与固定清单" description="实时检查 manifest 对应文件是否存在；按需执行逐文件 SHA-256 完整性校验。" action={<button className="secondary-button" disabled={verifying} onClick={() => void verify()}>{verifying ? <LoaderCircle className="spin" size={16} /> : <FileCheck2 size={16} />} {verifying ? '正在校验…' : '校验全部 SHA-256'}</button>} />
+    <PageHeader eyebrow="数据资产 · Debug / formal-v1" title="数据集与固定清单" description="本页管理 Debug 与 formal-v1 数据清单，检查文件状态并按需校验 SHA-256。" action={<button className="secondary-button" disabled={verifying} onClick={() => void verify()}>{verifying ? <LoaderCircle className="spin" size={16} /> : <FileCheck2 size={16} />} {verifying ? '正在校验…' : '校验本页清单 SHA-256'}</button>} />
+    <p className="research-scope-note">Budget-WAM 使用 geometry-v3 独立图像划分，本页计数与校验范围为 Debug / formal-v1。<Link className="text-button" to="/results#geometry-v3">查看新方法的数据规模与跨数据集结果 →</Link></p>
     {error && <div className="form-message error">{error}</div>}
     {reports.length > 0 && <div className={`verification-banner ${reports.every((report) => report.valid) ? 'valid' : 'invalid'}`}>{reports.every((report) => report.valid) ? <CheckCircle2 size={18} /> : <XCircle size={18} />}<span>{reports.every((report) => report.valid) ? `完整性通过：${reports.reduce((sum, report) => sum + report.verified, 0)} 个文件 SHA-256 全部匹配。` : '发现缺失或摘要不匹配文件，请查看各数据集状态。'}</span></div>}
     <section className="dataset-summary"><div><span>来源数量</span><strong>{catalog.datasets.length}</strong><small>公开研究数据集</small></div><div><span>Debug10 样本</span><strong>{catalog.datasets.reduce((sum, item) => sum + item.counts.debug.expected, 0)}</strong><small>固定调试集合</small></div><div><span>Formal-v1</span><strong>{catalog.formal.test_images} + {catalog.formal.calibration_images}</strong><small>test + calibration</small></div><div><span>本地文件</span><strong>{found}/{expected}</strong><small>按相对路径检查</small></div></section>

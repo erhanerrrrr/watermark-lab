@@ -5,6 +5,8 @@ import type {
   ApiHealth,
   DatasetVerification,
   RunExperimentPayload,
+  ResearchEvidence,
+  GeometryEvidence,
 } from '../types'
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
@@ -28,7 +30,7 @@ async function request<T>(path: string, init?: RequestInit, timeoutMs = 10_000):
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal: controller.signal })
+    response = await fetch(`${API_BASE_URL}${path}`, { cache: 'no-store', ...init, signal: controller.signal })
   } catch (error) {
     const message = error instanceof DOMException && error.name === 'AbortError'
       ? 'API 请求超时，请检查模型是否仍在运行。'
@@ -92,4 +94,20 @@ export function manifestUrl(datasetId: string, split: 'debug' | 'calibration' | 
 
 export function experimentExportUrl(): string {
   return apiUrl('/experiments/export.csv')
+}
+
+export function getResearchEvidence(): Promise<ResearchEvidence> {
+  return request('/research/evidence', undefined, 30_000)
+}
+
+export function researchEvidenceExportUrl(): string {
+  return apiUrl('/research/evidence/export.json')
+}
+
+export function getGeometryEvidence(): Promise<GeometryEvidence> {
+  return request('/research/geometry-v3', undefined, 30_000)
+}
+
+export function geometryEvidenceExportUrl(): string {
+  return apiUrl('/research/geometry-v3/export.json')
 }

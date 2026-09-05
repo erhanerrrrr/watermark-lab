@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from watermark_lab.api.app import create_app
+from watermark_lab.api.service import read_rgb_image
 
 
 def _image_bytes(size: int = 256) -> bytes:
@@ -19,6 +20,23 @@ def _image_bytes(size: int = 256) -> bytes:
     stream = io.BytesIO()
     image.save(stream, format="PNG")
     return stream.getvalue()
+
+
+def test_read_rgb_image_maps_pillow_decompression_bomb_to_value_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Bomb:
+        size = (128, 128)
+
+        def __enter__(self):
+            raise Image.DecompressionBombError("too many pixels")
+
+        def __exit__(self, *_args):
+            return False
+
+    monkeypatch.setattr("watermark_lab.api.service.Image.open", lambda *_args: Bomb())
+    with pytest.raises(ValueError, match="无法读取图片"):
+        read_rgb_image(b"fake")
 
 
 @pytest.fixture
@@ -54,9 +72,16 @@ def test_health_catalog_and_models_are_real(client: TestClient) -> None:
 
     models = client.get("/api/models").json()
     assert any(item["id"] == "dwt_dct" for item in models)
+    budget = next(item for item in models if item["id"] == "budget_wam")
+    assert budget["display_name"] == "Budget-WAM"
+    assert budget["formal_metrics"] is None
     assert all(item["display_name"] for item in models)
 
     catalog = client.get("/api/catalog").json()
+    assert {model["id"] for model in catalog["models"]} == {
+        "lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam", "budget_wam"
+    }
+    assert client.get("/api/catalog").headers["cache-control"] == "no-store"
     assert catalog["formal"]["records"] == 121_440
     assert catalog["formal"]["complete"] is True
     assert catalog["formal"]["detection"]["records"] == 6_640
@@ -70,7 +95,10 @@ def test_health_catalog_and_models_are_real(client: TestClient) -> None:
     )
     assert len(catalog["datasets"]) == 4
     assert len(catalog["protocol"]["cases"]) == 44
-    assert len(catalog["interactive_attacks"]) == 8
+    assert len(catalog["interactive_attacks"]) == 11
+    assert {"rotate_black", "rotate_reflect", "rotate_crop_resize"} <= {
+        attack["id"] for attack in catalog["interactive_attacks"]
+    }
 
 
 def test_single_experiment_persists_artifacts_and_exports(
@@ -171,7 +199,9 @@ def test_built_frontend_is_served_as_a_single_page_app(tmp_path: Path) -> None:
     client = TestClient(create_app(storage_dir=tmp_path / "storage", frontend_dir=frontend))
 
     assert client.get("/").status_code == 200
-    assert client.get("/results").text.startswith("<html>")
+    response = client.get("/results")
+    assert response.text.startswith("<html>")
+    assert response.headers["cache-control"] == "no-cache"
     assert client.get("/assets/app.js").text == "console.log('ok')"
     assert client.get("/api").status_code == 404
     assert client.get("/api/not-a-route").status_code == 404

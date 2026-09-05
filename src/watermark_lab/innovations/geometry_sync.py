@@ -110,10 +110,7 @@ def _homography(source: np.ndarray, destination: np.ndarray) -> np.ndarray:
     ).reshape(3, 3)
 
 
-def correct_perspective(image: ImageArray, magnitude: float) -> ImageArray:
-    """Map the protocol's trapezoid-shaped attacked image back to the full canvas."""
-
-    height, width = image.shape[:2]
+def _perspective_correction_matrix(width: int, height: int, magnitude: float) -> np.ndarray:
     max_x = float(width - 1)
     max_y = float(height - 1)
     source = np.array(((0, 0), (max_x, 0), (max_x, max_y), (0, max_y)), dtype=float)
@@ -127,6 +124,14 @@ def correct_perspective(image: ImageArray, magnitude: float) -> ImageArray:
     # sample each original corner from its attacked-image location.
     matrix = _homography(source, attacked_corners)
     matrix /= matrix[2, 2]
+    return matrix
+
+
+def correct_perspective(image: ImageArray, magnitude: float) -> ImageArray:
+    """Map the protocol's trapezoid-shaped attacked image back to the full canvas."""
+
+    height, width = image.shape[:2]
+    matrix = _perspective_correction_matrix(width, height, magnitude)
     coefficients = tuple(float(value) for value in matrix.reshape(-1)[:8])
     pil_image = Image.fromarray(np.asarray(image, dtype=np.uint8), mode="RGB")
     fill = tuple(int(value) for value in np.median(image, axis=(0, 1)))
@@ -139,6 +144,58 @@ def correct_perspective(image: ImageArray, magnitude: float) -> ImageArray:
             fillcolor=fill,
         )
     )
+
+
+def localization_in_input_coordinates(
+    probabilities: np.ndarray,
+    transform: str,
+    image_shape: tuple[int, ...],
+) -> np.ndarray:
+    """Return a detector-sized map aligned to the input, undoing branch correction.
+
+    WAM may stretch a rectangular input onto a square detector grid. The inverse
+    warp is therefore defined in image coordinates and conjugated by the two
+    grid scales; rotating the detector array directly would distort its geometry.
+    Pixels outside the corrected branch's canvas have no evidence and receive 0.
+    """
+
+    detection = np.asarray(probabilities, dtype=np.float32)
+    if transform == "identity":
+        return np.ascontiguousarray(detection)
+    height, width = image_shape[:2]
+    if transform.startswith("rotation_"):
+        angle = np.deg2rad(float(transform.removeprefix("rotation_")))
+        cosine, sine = np.cos(angle), np.sin(angle)
+        center_x, center_y = width / 2.0, height / 2.0
+        # Output/input here mean the returned map/the corrected detector map.
+        # This is the forward rotation used to construct the corrected branch,
+        # hence the inverse of Pillow's correction sampling matrix.
+        matrix = np.array(
+            (
+                (cosine, sine, center_x - cosine * center_x - sine * center_y),
+                (-sine, cosine, center_y + sine * center_x - cosine * center_y),
+                (0.0, 0.0, 1.0),
+            ),
+            dtype=np.float64,
+        )
+    elif transform.startswith("perspective_"):
+        magnitude = float(transform.removeprefix("perspective_"))
+        matrix = np.linalg.inv(_perspective_correction_matrix(width, height, magnitude))
+    else:
+        raise ValueError(f"unknown geometry branch {transform!r}")
+    detector_height, detector_width = detection.shape
+    grid_to_image = np.diag((width / detector_width, height / detector_height, 1.0))
+    matrix = np.linalg.inv(grid_to_image) @ matrix @ grid_to_image
+    matrix /= matrix[2, 2]
+    coefficients = tuple(float(value) for value in matrix.reshape(-1)[:8])
+    remapped = Image.fromarray(detection).transform(
+        (detector_width, detector_height),
+        Image.Transform.PERSPECTIVE,
+        coefficients,
+        resample=Image.Resampling.BILINEAR,
+        fillcolor=0.0,
+    )
+    return np.ascontiguousarray(np.clip(np.asarray(remapped), 0.0, 1.0), dtype=np.float32)
 
 
 def geometry_border_evidence(
@@ -330,6 +387,7 @@ class GeometrySyncDecoder:
         best_candidate = branches[0]
         accept_geometry = (
             best_candidate.name != "identity"
+            and best_candidate.selected_fraction > 0.0
             and best_candidate.score - identity.score
             >= self.config.minimum_score_improvement
             and border_evidence >= self.config.minimum_border_evidence
@@ -339,7 +397,11 @@ class GeometrySyncDecoder:
             branches.insert(0, identity)
             top = [identity]
         else:
-            top = branches[: min(self.config.fusion_top_k, len(branches))]
+            # Empty detection masks use -inf pooled logits as a no-message
+            # sentinel. Even a small positive fusion weight would otherwise
+            # erase every valid positive bit from a recovered branch.
+            valid_branches = [branch for branch in branches if branch.selected_fraction > 0.0]
+            top = valid_branches[: self.config.fusion_top_k]
         scores = np.asarray([branch.score for branch in top], dtype=np.float64)
         scores -= float(np.max(scores))
         weights = np.exp(scores / self.config.score_temperature)
@@ -352,7 +414,8 @@ class GeometrySyncDecoder:
         message = (fused_logits > self.model.bit_logit_threshold).astype(np.uint8)
         best = top[0]
         detected = (
-            best.selected_fraction >= self.model.minimum_detected_fraction
+            best.selected_fraction > 0.0
+            and best.selected_fraction >= self.model.minimum_detected_fraction
         )
         margins = np.abs(fused_logits - self.model.bit_logit_threshold)
         branch_records = [
@@ -371,9 +434,10 @@ class GeometrySyncDecoder:
             message=np.ascontiguousarray(message),
             detected=detected,
             confidence=best.confidence,
-            localization=np.ascontiguousarray(
+            localization=localization_in_input_coordinates(
                 best.prediction.detection_probabilities,
-                dtype=np.float32,
+                best.name,
+                image.shape,
             ),
             metadata={
                 "variant": "wam_mit_geometry_sync",
@@ -395,6 +459,8 @@ class GeometrySyncDecoder:
                 "fusion_weights": [float(value) for value in weights],
                 "fused_transforms": [branch.name for branch in top],
                 "detected_fraction": best.selected_fraction,
+                "localization_coordinate_system": "input_image",
+                "localization_grid": "detector",
                 "minimum_absolute_bit_margin": float(np.min(margins)),
                 "mean_absolute_bit_margin": float(np.mean(margins)),
                 "geometry_branches": branch_records,

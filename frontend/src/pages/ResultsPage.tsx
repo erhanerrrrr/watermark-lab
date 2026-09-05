@@ -3,6 +3,9 @@ import { Download, RefreshCw, TrendingUp } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ApiRequired, PageHeader, StatusBadge } from '../components/Layout'
+import { ResearchEvidence } from '../components/ResearchEvidence'
+import { GeometryDecision } from '../components/GeometryDecision'
+import { GeometryEvidence } from '../components/GeometryEvidence'
 import { experimentExportUrl, getExperiment } from '../services/api'
 import { useApi } from '../services/ApiContext'
 import type { ApiExperimentDetail } from '../types'
@@ -22,11 +25,14 @@ export function ResultsPage() {
   }, [experiments, selectedId])
   useEffect(() => {
     if (!selectedId) { setDetail(null); return }
+    let active = true
+    setDetail(null)
     setLoadingDetail(true); setError('')
     getExperiment(selectedId)
-      .then(setDetail)
-      .catch((caught) => setError(caught instanceof Error ? caught.message : '无法读取实验详情。'))
-      .finally(() => setLoadingDetail(false))
+      .then((result) => { if (active) setDetail(result) })
+      .catch((caught) => { if (active) setError(caught instanceof Error ? caught.message : '无法读取实验详情。') })
+      .finally(() => { if (active) setLoadingDetail(false) })
+    return () => { active = false }
   }, [selectedId])
 
   const visibleExperiments = useMemo(() => experiments.filter((item) => !modelFilter || item.model === modelFilter), [experiments, modelFilter])
@@ -42,9 +48,13 @@ export function ResultsPage() {
     {error && <div className="form-message error">{error}</div>}
     {loadingDetail && <div className="page-state inline"><span className="status-dot checking" />正在读取实验产物…</div>}
     {detail && !loadingDetail && <section className="panel real-result"><div className="panel-heading"><div><span className="panel-kicker">持久化真实实验</span><h2>{detail.id} · {catalog.models.find((model) => model.id === detail.model)?.display_name ?? detail.model}</h2></div><StatusBadge tone={detail.complete_recovery ? 'green' : 'amber'}>{detail.complete_recovery ? '消息完整恢复' : '消息未完整恢复'}</StatusBadge></div><div className="real-kpis"><div><span>嵌入 PSNR</span><strong>{detail.embed_psnr_db?.toFixed(2) ?? '∞'} dB</strong></div><div><span>嵌入 SSIM</span><strong>{detail.embed_ssim.toFixed(4)}</strong></div><div><span>Bit Accuracy</span><strong>{(detail.bit_accuracy * 100).toFixed(2)}%</strong></div><div><span>BER</span><strong>{(detail.ber * 100).toFixed(2)}%</strong></div><div><span>检测置信度</span><strong>{(detail.detection_confidence * 100).toFixed(2)}%</strong></div></div><div className="image-compare"><figure><img src={detail.artifacts.original} alt="原始图片" /><figcaption>原始图像</figcaption></figure><figure><img src={detail.artifacts.embedded} alt="嵌入水印图片" /><figcaption>嵌入水印 · {detail.encode_ms.toFixed(1)} ms</figcaption></figure><figure><img src={detail.artifacts.attacked} alt="攻击后图片" /><figcaption>攻击后 · {detail.attack} · 解码 {detail.decode_ms.toFixed(1)} ms</figcaption></figure></div><div className="message-compare"><span>预期消息 <code>{detail.expected_message}</code></span><span>提取消息 <code>{detail.decoded_message}</code></span><span>攻击参数 <code>{JSON.stringify(detail.attack_parameters)}</code></span></div></section>}
+    {detail && !loadingDetail && <GeometryDecision metadata={detail.metadata} />}
+    {detail && !loadingDetail && detail.model !== 'budget_wam' && <p className="evidence-note">检测使用模型默认规则；研究页的校准误报率仅对应独立 clean 评测。</p>}
     {!detail && !loadingDetail && <div className="panel empty-state">尚无真实交互实验。请在“水印实验”页面上传图片并运行。</div>}
     <section className="result-kpis"><div><span>AM-WAM Bit Accuracy</span><strong>{(best.bit_accuracy * 100).toFixed(2)}%</strong><small className="positive">{source}</small></div><div><span>平均嵌入 PSNR</span><strong>{best.embed_psnr_db.toFixed(3)} dB</strong><small>目标质量约 {catalog.formal.target_psnr_db} dB</small></div><div><span>完整恢复率</span><strong>{(best.complete_recovery * 100).toFixed(2)}%</strong><small>相对 WAM +{catalog.formal.innovation.complete_recovery_gain_pp.toFixed(3)} pp</small></div><div><span>完整记录</span><strong>{catalog.formal.records.toLocaleString()}</strong><small>{catalog.formal.test_images} 图 × {catalog.formal.attack_cases} 攻击 × 4 模型</small></div></section>
     <section className="results-grid"><div className="panel chart-panel"><div className="panel-heading"><div><span className="panel-kicker">模型对比 · 冻结结果</span><h2>恢复率与准确率</h2></div><TrendingUp size={18} className="muted" /></div><div className="chart-wrap"><ResponsiveContainer width="100%" height={300}><BarChart data={formalRows} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} /><XAxis dataKey="name" tickLine={false} axisLine={false} /><YAxis domain={[0, 105]} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} /><Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} /><Legend /><Bar dataKey="bitAccuracy" name="Bit Accuracy" fill="#2563eb" radius={[4, 4, 0, 0]} isAnimationActive={false} /><Bar dataKey="recovery" name="完整恢复率" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} /></BarChart></ResponsiveContainer></div></div><div className="panel insight-panel"><span className="panel-kicker">创新收益与边界</span><h2>AM-WAM 改善几何失配</h2><p>10° 旋转完整恢复率提高 {catalog.formal.innovation.rotation_10_gain_pp.toFixed(2)} 个百分点，重透视提高 {catalog.formal.innovation.perspective_heavy_gain_pp.toFixed(2)} 个百分点；平均解码额外增加约 {catalog.formal.innovation.decode_overhead_ms.toFixed(0)} ms。</p><div className="insight-stat"><strong>+{catalog.formal.innovation.rotation_10_gain_pp.toFixed(2)} pp</strong><span>10° 旋转完整恢复率提升</span></div><StatusBadge tone="amber">强模糊仍未改善</StatusBadge></div></section>
+    <GeometryEvidence />
+    <ResearchEvidence />
     <section className="results-grid">
       <div className="panel insight-panel">
         <span className="panel-kicker">独立正/负检测 · {detection.records.toLocaleString()} 条</span>

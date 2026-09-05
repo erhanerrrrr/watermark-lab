@@ -1,7 +1,25 @@
 # 项目状态与新对话交接
 
-更新时间：2026-09-04。研究总方针以根目录 `PROJECT_GUIDELINE.md` 为准，完整环境、
+更新时间：2026-09-05。研究总方针以根目录 `PROJECT_GUIDELINE.md` 为准，完整环境、
 权重、数据与结果恢复命令以 `docs/REPRODUCIBILITY.md` 为准。
+
+最新增量：已完成[完整性与创新深度评估](RESEARCH_DEPTH_AUDIT.md)，新增跨数据集/攻击
+研究证据 API 与前端、配对救回/退化和敏感性分析；修复几何定位回投影及空检测分支
+融合，见 [GEOMETRY_OUTPUT_CORRECTIONS.md](GEOMETRY_OUTPUT_CORRECTIONS.md)。
+新边界诊断见 [BORDER_STRESS_RESULTS.md](BORDER_STRESS_RESULTS.md)。旧正式数据未重写，
+后续材料必须区分旧模型结果、本轮代码修复和探索性诊断。
+
+首选路线现已实现为 **Budget-WAM / geometry-v3**，见
+[实现与复现](GEOMETRY_V3_IMPLEMENTATION.md)和[独立测试结果](GEOMETRY_V3_RESULTS.md)。
+48 张新 calibration 选择并冻结策略；80 张新 test × 16 项攻击、六对照完成
+9,600 条正负评价记录。恢复率 86.33%（旧 AM 门控 62.73%），平均候选 3.66/10，
+上限 7；相对最佳完整搜索 −2.66 pp，95% CI [−4.22, −1.25] pp，未证明预设统计
+非劣。负样本误报 4/80 张图。该实验独立于原 formal-v1，不合并排名。
+
+Web 最新增量：已完成 [TrustMark 独立推理进程与统一调度](TRUSTMARK_WORKER.md)。
+WAM 主 API 自动调用既有 TrustMark Python/NumPy 1.x 环境，模型库显示六个模型均可用。
+真实 API 的六模型单图闭环、TrustMark 独立嵌入与盲提取、历史与导出通过，209 项测试通过。
+前端运行标签区分主服务与 TrustMark 独立 CPU 进程；工程验证没有新增或替换正式研究指标。
 
 ## 1. 一句话现状
 
@@ -22,7 +40,7 @@ formal-v1 审计、6,640 条独立正负检测和 3,840 条 robustness-v2 外推
 | 算法内核 | 可用 | 统一模型接口、4 个研究模型、攻击与指标 | 继续做失败案例和论文消融 |
 | 实验后端 | 可用 | manifest、校准、可恢复运行器、统计与绘图 | 固化正式结果快照 |
 | CLI | 可用 | 状态、自检、协议和批量实验 | 保持为研发入口 |
-| HTTP API | 展示版完成 | 真实 catalog、SQLite 历史、PNG 产物、实验/嵌入/提取、CSV、数据校验 | 后续可选长任务队列 |
+| HTTP API | 展示版完成 | 真实 catalog、SQLite/PNG、实验/嵌入/提取、TrustMark 独立进程、导出与校验 | 后续可选长任务队列 |
 | Web 前端 | 展示版完成 | 六页真实 API、正式快照、实验、历史、产物、导出、错误状态 | 课程展示内容微调 |
 | Windows 启动 | 完成 | 一键构建、单端口服务、浏览器启动、四段验收脚本 | 最终 Release 验证 |
 
@@ -30,6 +48,7 @@ formal-v1 审计、6,640 条独立正负检测和 3,840 条 robustness-v2 外推
 
 ```text
 React 前端 -> FastAPI 后端 -> watermark_lab 研究内核
+                             -> TrustMark 独立环境中的推理进程
                              -> artifacts/web PNG + SQLite 元数据
                              -> 冻结配置 / manifest / formal-v1 结果
 ```
@@ -49,6 +68,7 @@ API 层只编排现有 Python 接口，不复制模型算法。第一版面向�
 | M5.2 展示系统 | 完成 | v0.2 单端口 Web/API、真实数据源、SQLite/PNG、CSV、SHA-256、一键启动 |
 | P0 正式审计/检测 | 完成 | 121,440 条审计通过；140 calibration + 690 test 正负检测，共 6,640 条 |
 | P1 扩展鲁棒性 | 完成 | 24 条新攻击、40 张固定 test 图、4 模型，共 3,840 条与 2,000 次 Bootstrap |
+| M6 预算几何同步 | 完成 | Budget-WAM、48/80 新图、六对照、在线计时与前后端；点估计达标，统计非劣尚不成立 |
 | M5.3 课程交付 | 进行中 | 引用/许可清单已完成；课程论文、答辩 PPT、演示视频和最终 Release 待完成 |
 
 ## 4. 已确认研究结论

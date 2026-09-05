@@ -4,7 +4,26 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from watermark_lab.cli import main
+from watermark_lab.cli import build_parser, main
+
+
+def test_cli_exposes_budget_wam_for_self_check_and_manifest_runs() -> None:
+    parser = build_parser()
+    self_check = parser.parse_args(["self-check", "--model", "budget_wam"])
+    manifest = parser.parse_args(
+        [
+            "run-manifest",
+            "--model",
+            "budget_wam",
+            "--manifest",
+            "manifest.csv",
+            "--dataset-root",
+            "images",
+            "--output",
+            "result.csv",
+        ]
+    )
+    assert self_check.model == manifest.model == "budget_wam"
 
 
 def test_cli_manifest_to_dwt_dct_result(tmp_path: Path) -> None:
