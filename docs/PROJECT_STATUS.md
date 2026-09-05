@@ -18,7 +18,7 @@
 
 Web 最新增量：已完成 [TrustMark 独立推理进程与统一调度](TRUSTMARK_WORKER.md)。
 WAM 主 API 自动调用既有 TrustMark Python/NumPy 1.x 环境，模型库显示六个模型均可用。
-真实 API 的六模型单图闭环、TrustMark 独立嵌入与盲提取、历史与导出通过，207 项测试通过。
+真实 API 的六模型单图闭环、TrustMark 独立嵌入与盲提取、历史与导出通过，209 项测试通过。
 前端运行标签区分主服务与 TrustMark 独立 CPU 进程；工程验证没有新增或替换正式研究指标。
 
 ## 1. 一句话现状

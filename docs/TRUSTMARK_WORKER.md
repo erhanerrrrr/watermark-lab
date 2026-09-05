@@ -99,7 +99,7 @@ $env:WATERMARK_LAB_TRUSTMARK_MODE = "isolated"
 
 2026-09-05 完成：
 
-- Python Ruff、207 项完整测试、前端 ESLint 和 TypeScript/Vite 生产构建通过。
+- Python Ruff、209 项完整测试、前端 ESLint 和 TypeScript/Vite 生产构建通过。
 - 真实轻量子进程测试覆盖分帧、并发请求、退出恢复、读写超时、错误响应和 Windows
   实际解释器子进程回收；API 测试覆盖三端点路由、故障不保存记录和其他模型仍可用。
 - 在同一个 `http://127.0.0.1:8001` 上，六种模型均完成自然图像 clean 嵌入—提取闭环，
