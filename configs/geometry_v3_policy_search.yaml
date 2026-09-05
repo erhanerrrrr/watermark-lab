@@ -1,0 +1,11 @@
+selection_split: calibration
+max_candidates: [5, 7, 10]
+minimum_search_fraction: [0.01, 0.05]
+identity_minimum_margin: [0.25, 0.5, 0.8, 1.2, 2.0, 4.0]
+stop_minimum_margin: [0.25, 0.5, 0.8, 1.2, 2.0, 4.0]
+reliable_agreement: [0.90, 0.95]
+reliable_fraction: 0.25
+minimum_score_improvement: 0.006
+detection_threshold: next representable float above maximum selected score on calibration negatives
+tie_break: satisfy predefined recovery and cost criteria, then fewest mean candidates, highest recovery
+failure_rule: if no policy meets both criteria, maximize recovery among policies meeting cost target and explicitly report failure

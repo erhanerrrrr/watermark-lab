@@ -1,0 +1,13 @@
+﻿dataset,split,sample_id,relative_path,width,height,image_format,sha256
+geometry_v3_diffusiondb,calibration,3b3c64b7-2bd3-48d8-a0ad-4adf70d4da4d.png,3b3c64b7-2bd3-48d8-a0ad-4adf70d4da4d.png,512,512,PNG,6d3cc3d49e69ca0beba3936d08bc5164a2fedb3466e28a2d2a92dfd0b98fadc3
+geometry_v3_diffusiondb,calibration,3bf87522-7557-46b5-b166-c0e234f1af09.png,3bf87522-7557-46b5-b166-c0e234f1af09.png,1024,512,PNG,ae76dea65369acab68a2422dc1e4178dc1e3d050fdf134ed65d7a6c7e2ac0cb1
+geometry_v3_diffusiondb,calibration,3bfcd9cf-26ea-4303-bbe1-b095853f5360.png,3bfcd9cf-26ea-4303-bbe1-b095853f5360.png,704,512,PNG,d5d0715da2750f822337497dacc68342b116ec3787c5e430bf33d8975b10bef3
+geometry_v3_diffusiondb,calibration,3c586acb-14dc-43df-8900-954c336f01b3.png,3c586acb-14dc-43df-8900-954c336f01b3.png,512,768,PNG,3873ac3f8f82f192f7c827192ef4295f8ba33d4dfdb932bbc4d4b7b022364fa2
+geometry_v3_diffusiondb,calibration,3c69fab0-c054-45f1-842f-6e545d48e8f9.png,3c69fab0-c054-45f1-842f-6e545d48e8f9.png,768,512,PNG,f34f85864326ec3944fb62ea6c2b0c0408a371ed8457985005e298955a8259a2
+geometry_v3_diffusiondb,calibration,3c835fdc-9047-4298-ac8a-7461f5490132.png,3c835fdc-9047-4298-ac8a-7461f5490132.png,512,512,PNG,317b093f3edaedd997a87c1dfe31cbfd4bad235288d9ab38e66a31fae4c7e8d7
+geometry_v3_diffusiondb,calibration,3c9646e0-336a-40b2-8538-07991b248ef4.png,3c9646e0-336a-40b2-8538-07991b248ef4.png,512,512,PNG,f167c8daf4c3316aec16664b260164f32b3fdd30f3b5e350225cdc3c9605ea2e
+geometry_v3_diffusiondb,calibration,3ccbbf7b-668e-4b26-a534-aae15f8565df.png,3ccbbf7b-668e-4b26-a534-aae15f8565df.png,512,896,PNG,b8e3fef863e6b47d7701200bf76cf160564088bcfcbd563ef83388a414bbde80
+geometry_v3_diffusiondb,calibration,3cddae04-6043-4e0e-bca0-5642fe528570.png,3cddae04-6043-4e0e-bca0-5642fe528570.png,512,512,PNG,262871d14d628d65f4b04cb43d3a4cc153d1edd7b36427ea3e108ccec44285fb
+geometry_v3_diffusiondb,calibration,3cea10ca-40e3-40ff-b519-8fc39113ed5c.png,3cea10ca-40e3-40ff-b519-8fc39113ed5c.png,512,576,PNG,d0e5582ee4b8133519b00c28062ac7448707288e2ce183f50e3e234f386f9785
+geometry_v3_diffusiondb,calibration,3d18dff4-74bb-4af3-95e1-762cbb6fb37b.png,3d18dff4-74bb-4af3-95e1-762cbb6fb37b.png,1024,512,PNG,5436c5bb34b78220066dad997a104bb0ef637436f7b6007729f7063c06bc8518
+geometry_v3_diffusiondb,calibration,3e5ddfa2-442d-4723-bf23-81e4fe4f9574.png,3e5ddfa2-442d-4723-bf23-81e4fe4f9574.png,512,512,PNG,480542067c29ffbcef97d7a4a93911046c16d06e2f191829a68bc2cd794789c4

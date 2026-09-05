@@ -54,9 +54,16 @@ def test_health_catalog_and_models_are_real(client: TestClient) -> None:
 
     models = client.get("/api/models").json()
     assert any(item["id"] == "dwt_dct" for item in models)
+    budget = next(item for item in models if item["id"] == "budget_wam")
+    assert budget["display_name"] == "Budget-WAM"
+    assert budget["formal_metrics"] is None
     assert all(item["display_name"] for item in models)
 
     catalog = client.get("/api/catalog").json()
+    assert {model["id"] for model in catalog["models"]} == {
+        "lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam", "budget_wam"
+    }
+    assert client.get("/api/catalog").headers["cache-control"] == "no-store"
     assert catalog["formal"]["records"] == 121_440
     assert catalog["formal"]["complete"] is True
     assert catalog["formal"]["detection"]["records"] == 6_640
@@ -70,7 +77,10 @@ def test_health_catalog_and_models_are_real(client: TestClient) -> None:
     )
     assert len(catalog["datasets"]) == 4
     assert len(catalog["protocol"]["cases"]) == 44
-    assert len(catalog["interactive_attacks"]) == 8
+    assert len(catalog["interactive_attacks"]) == 11
+    assert {"rotate_black", "rotate_reflect", "rotate_crop_resize"} <= {
+        attack["id"] for attack in catalog["interactive_attacks"]
+    }
 
 
 def test_single_experiment_persists_artifacts_and_exports(
@@ -171,7 +181,9 @@ def test_built_frontend_is_served_as_a_single_page_app(tmp_path: Path) -> None:
     client = TestClient(create_app(storage_dir=tmp_path / "storage", frontend_dir=frontend))
 
     assert client.get("/").status_code == 200
-    assert client.get("/results").text.startswith("<html>")
+    response = client.get("/results")
+    assert response.text.startswith("<html>")
+    assert response.headers["cache-control"] == "no-cache"
     assert client.get("/assets/app.js").text == "console.log('ok')"
     assert client.get("/api").status_code == 404
     assert client.get("/api/not-a-route").status_code == 404

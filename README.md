@@ -5,12 +5,27 @@
 研究总方针见 [PROJECT_GUIDELINE.md](PROJECT_GUIDELINE.md)。新成员应先阅读：
 
 - [项目状态与新对话交接](docs/PROJECT_STATUS.md)
+- [完整性与创新深度评估（2026-09-05）](docs/RESEARCH_DEPTH_AUDIT.md)
+- [Budget-WAM 预算几何同步实现](docs/GEOMETRY_V3_IMPLEMENTATION.md)
+- [geometry-v3 独立测试结果](docs/GEOMETRY_V3_RESULTS.md)
+- [可筛选的研究证据](docs/RESEARCH_EVIDENCE.md)
 - [Windows 共创复现指南](docs/REPRODUCIBILITY.md)
 - [本地展示与 Web 开发指南](docs/WEB_SHOWCASE.md)
+- [TrustMark 独立推理进程与统一调度](docs/TRUSTMARK_WORKER.md)
 - [数据来源与许可证](data/SOURCES.md)
 - [论文引用与第三方许可清单](docs/REFERENCES_AND_LICENSES.md)
 
 ## 当前状态
+
+2026-09-05 独立评估新增：跨数据集/攻击证据面板、配对救回/退化与敏感性分析，
+并修复几何定位坐标与空检测分支融合。新增边界填充压力诊断与历史 formal-v1 隔离；
+完整判断、创新边界及下一阶段优先级见[深度评估](docs/RESEARCH_DEPTH_AUDIT.md)。
+
+首选创新已实现为 **Budget-WAM**：以解码证据决定几何搜索与提前停止，最多 7 次
+候选调用。geometry-v3 使用 48 张新 calibration 和 80 张新 test、六种对照；
+test 完整恢复率 86.33%，旧 AM 门控 62.73%，平均调用 3.66 次。相对完整搜索
+最佳分支下降 2.66 pp，点估计达标，但 95% CI 尚不支持预设统计非劣；负图误报
+4/80。协议、分数据集结果及实际计时见上方独立结果文档。
 
 - 已建立统一模型、攻击、数据集、指标和实验接口。
 - 已提供轻量 LSB 自检模型，用于验证完整实验管线。
@@ -119,9 +134,9 @@ powershell -ExecutionPolicy Bypass -File scripts\start_showcase_windows.ps1 -Run
 powershell -ExecutionPolicy Bypass -File scripts\verify_showcase_windows.ps1
 ```
 
-API 文档位于 `http://127.0.0.1:8000/docs`。启动 API 的 Python 环境决定交互实验当前
-可用模型；全部正式比较数据始终从冻结结果加载。TrustMark-Q 与 WAM/AM-WAM 因固定依赖
-不同继续使用隔离环境。开发模式、持久化位置与完整接口见
+API 文档位于 `http://127.0.0.1:8000/docs`。主 API 使用 WAM 环境时，会自动发现既有
+TrustMark 环境并通过独立进程调度，使六个模型可在同一网页运行；两套依赖保持隔离。
+模型目录根据实际运行能力更新，全部正式比较数据仍从冻结结果加载。开发模式、持久化位置与完整接口见
 [本地展示与 Web 开发指南](docs/WEB_SHOWCASE.md)。
 
 ## 项目结构

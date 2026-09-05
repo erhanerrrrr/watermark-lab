@@ -1,0 +1,78 @@
+{
+  "protocol_sha256": "c0a301c47b1699f5021e16d68aeee34d2a8cbe8eaa2be19683e75ac6271b8be8",
+  "source_split": "calibration",
+  "datasets": {
+    "coco": {
+      "strength": 1.6010525459049902,
+      "history": [
+        {
+          "strength": 2.0,
+          "mean_psnr_db": 38.11249660101955
+        },
+        {
+          "strength": 1.6093660136236516,
+          "mean_psnr_db": 39.955015196193024
+        },
+        {
+          "strength": 1.6010525459049902,
+          "mean_psnr_db": 39.997560007600384
+        }
+      ],
+      "manifest_sha256": "2600e8d690ea6b67fae2b51f5654e26536d2a4f3e40a898713fa6e60919bda5d"
+    },
+    "div2k": {
+      "strength": 1.6194521431648023,
+      "history": [
+        {
+          "strength": 2.0,
+          "mean_psnr_db": 38.22096904910013
+        },
+        {
+          "strength": 1.6295903646170058,
+          "mean_psnr_db": 39.945793409440235
+        },
+        {
+          "strength": 1.6194521431648023,
+          "mean_psnr_db": 39.99785311274154
+        }
+      ],
+      "manifest_sha256": "274404988a0ab9c4ba063119f9f368d1ce363ed59754f531edb0d4126e31b7e1"
+    },
+    "diffusiondb": {
+      "strength": 1.8006544923874124,
+      "history": [
+        {
+          "strength": 2.0,
+          "mean_psnr_db": 39.111015077459506
+        },
+        {
+          "strength": 1.8054303944376742,
+          "mean_psnr_db": 39.976992786533344
+        },
+        {
+          "strength": 1.8006544923874124,
+          "mean_psnr_db": 39.99936381282671
+        }
+      ],
+      "manifest_sha256": "feb3b060d8b060f8b6f57002da04ad5c6c7a041c7d808e87e24c81a20635c50d"
+    },
+    "w_bench": {
+      "strength": 1.9497736902812903,
+      "history": [
+        {
+          "strength": 2.0,
+          "mean_psnr_db": 39.78483778851383
+        },
+        {
+          "strength": 1.9510656598282146,
+          "mean_psnr_db": 39.99424641503868
+        },
+        {
+          "strength": 1.9497736902812903,
+          "mean_psnr_db": 39.99989792319822
+        }
+      ],
+      "manifest_sha256": "a01a96d92ebb8b498c8cabb05bbf5e0fc262400a1bc4a2442cf42b1bd6a426ed"
+    }
+  }
+}

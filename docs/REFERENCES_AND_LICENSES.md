@@ -8,6 +8,8 @@ manifest 规则仍以 `data/SOURCES.md` 为准。
 
 1. 介绍 WAM/AM-WAM 时引用 `sander2025watermark`；AM-WAM 是本课程项目基于 WAM
    推理、几何同步和聚类流程的改进，不应写成 Meta 官方模型。
+   新增 Budget-WAM 也沿用该官方底层网络，贡献是本项目的推理预算与证据决策策略，
+   不属于另行训练的官方模型；geometry-v3 的数据子集和实验口径见对应实现文档。
 2. 介绍 TrustMark-Q 时引用 `bui2025trustmark`。若讨论其 2023 预印本历史，可改用
    `bui2023trustmark`，正文同一处不必重复引用两个版本。
 3. 首次介绍 COCO、DIV2K、DiffusionDB 时分别引用 `lin2014coco`、

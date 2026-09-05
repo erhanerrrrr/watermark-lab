@@ -1,0 +1,56 @@
+suite:
+  id: geometry-v3
+  seed: 20260906
+  max_input_side: 1024
+  calibration_per_dataset: 12
+  test_per_dataset: 20
+  development_per_dataset: 3
+  bootstrap_iterations: 2000
+  purpose: independent project-held-out evaluation of evidence-gated budgeted synchronization
+  selection: first available source filenames after excluding all pre-v3 manifest names and hashes
+  frozen_before_test: true
+
+data:
+  sources: [coco, div2k, diffusiondb, w_bench]
+  metadata: configs/geometry_v3_sources.json
+  roots: data/raw/geometry_v3
+  manifest_prefix: data/manifests/geometry_v3
+  div2k_note: validation split was exhausted by formal-v1; new images use unused train-source files
+
+embedding:
+  adaptive_config: configs/m4_ablation.yaml
+  fixed_strength: 2.0
+  note: all adaptive-decoder ablations reuse bit-identical embedding and attacked pixels
+
+attacks:
+  - {id: clean, family: control, name: identity}
+  - {id: jpeg50, family: non_geometry, name: jpeg, quality: 50}
+  - {id: blur4, family: non_geometry, name: gaussian_blur, radius: 4.0}
+  - {id: noise001, family: non_geometry, name: gaussian_noise, sigma: 0.01}
+  - {id: median_minus12_7, family: median, boundary: median, angle: -12.7}
+  - {id: median_plus8_3, family: median, boundary: median, angle: 8.3}
+  - {id: black_minus12_7, family: black, boundary: black, angle: -12.7}
+  - {id: black_plus8_3, family: black, boundary: black, angle: 8.3}
+  - {id: reflect_minus12_7, family: reflect, boundary: reflect, angle: -12.7}
+  - {id: reflect_plus8_3, family: reflect, boundary: reflect, angle: 8.3}
+  - {id: crop_minus12_7, family: crop_resize, boundary: crop_resize, angle: -12.7}
+  - {id: crop_plus8_3, family: crop_resize, boundary: crop_resize, angle: 8.3}
+  - {id: black8_jpeg70, family: compound, boundary: black, angle: 8.3, jpeg: 70}
+  - {id: reflect12_jpeg70, family: compound, boundary: reflect, angle: 12.7, jpeg: 70}
+  - {id: perspective008, family: perspective, name: perspective, magnitude: 0.08}
+  - id: perspective_quad
+    family: perspective
+    name: perspective
+    offsets: [0.021, 0.047, -0.036, 0.012, -0.018, -0.041, 0.052, -0.009]
+
+negative_attacks: [clean, jpeg50, black_plus8_3, reflect_plus8_3]
+selection_targets:
+  recovery_tolerance_vs_full_best_pp: 3.0
+  max_mean_candidate_fraction_vs_full: 0.70
+  max_calibration_false_positive_images: 0
+  note: select on calibration only; report unmet criteria without selecting on test
+timing:
+  test_images_per_dataset: 3
+  attacks: [clean, black_plus8_3, reflect_minus12_7, perspective008]
+  repetitions: 2
+  note: alternate method order, warm up, synchronize GPU, report native online wall time

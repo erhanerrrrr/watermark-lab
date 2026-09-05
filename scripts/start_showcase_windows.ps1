@@ -2,6 +2,10 @@
 param(
     [ValidateSet("wam", "trustmark", "base")]
     [string]$Runtime = "wam",
+    [ValidateNotNullOrEmpty()]
+    [string]$TrustMarkPython,
+    [ValidateSet("auto", "isolated", "local", "disabled")]
+    [string]$TrustMarkMode = "auto",
     [ValidateRange(1024, 65535)]
     [int]$Port = 8000,
     [switch]$SkipBuild,
@@ -55,6 +59,21 @@ if (-not $pythonPath) {
 
 Push-Location $projectRoot
 try {
+    if ($PSBoundParameters.ContainsKey("TrustMarkPython")) {
+        $trustMarkExecutable = if ([System.IO.Path]::IsPathRooted($TrustMarkPython)) {
+            [System.IO.Path]::GetFullPath($TrustMarkPython)
+        }
+        else {
+            [System.IO.Path]::GetFullPath((Join-Path $projectRoot $TrustMarkPython))
+        }
+        if (-not (Test-Path -LiteralPath $trustMarkExecutable -PathType Leaf)) {
+            throw "TrustMark Python executable was not found: $trustMarkExecutable"
+        }
+        $env:WATERMARK_LAB_TRUSTMARK_PYTHON = $trustMarkExecutable
+    }
+    if ($PSBoundParameters.ContainsKey("TrustMarkMode")) {
+        $env:WATERMARK_LAB_TRUSTMARK_MODE = $TrustMarkMode
+    }
     $sourcePath = Join-Path $projectRoot "src"
     if ($env:PYTHONPATH) {
         $env:PYTHONPATH = "$sourcePath$([System.IO.Path]::PathSeparator)$env:PYTHONPATH"
@@ -93,6 +112,7 @@ try {
         throw "frontend\dist is missing; -SkipBuild cannot be used."
     }
 
+    Write-Host "Checking the main Python environment; the API also probes the configured TrustMark runtime." -ForegroundColor Cyan
     Invoke-CheckedNative $pythonPath @("-m", "watermark_lab", "status") "Watermark Lab runtime check failed."
 
     $url = "http://127.0.0.1:$Port"
@@ -106,6 +126,8 @@ try {
     Write-Host ""
     Write-Host "Watermark Lab showcase: $url" -ForegroundColor Green
     Write-Host "API documentation: $url/docs" -ForegroundColor Green
+    $effectiveTrustMarkMode = if ($env:WATERMARK_LAB_TRUSTMARK_MODE) { $env:WATERMARK_LAB_TRUSTMARK_MODE } else { "auto" }
+    Write-Host "TrustMark routing: $effectiveTrustMarkMode. See /api/catalog for model availability." -ForegroundColor Cyan
     Write-Host "Runtime: $Runtime. Press Ctrl+C to stop." -ForegroundColor Yellow
     $previousPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"

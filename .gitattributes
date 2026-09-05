@@ -1,0 +1,24 @@
+# geometry-v3 freezes SHA-256 over raw file bytes, including line endings.
+# Preserve these inputs exactly on add/checkout, even with core.autocrlf=true.
+configs/geometry_v3_policy_search.yaml -text
+configs/geometry_v3_protocol.yaml -text
+configs/geometry_v3_selected_policy.json -text
+configs/geometry_v3_strengths.json -text
+configs/m4_ablation.yaml -text
+data/manifests/geometry_v3_coco_calibration.csv -text
+data/manifests/geometry_v3_coco_test.csv -text
+data/manifests/geometry_v3_diffusiondb_calibration.csv -text
+data/manifests/geometry_v3_diffusiondb_test.csv -text
+data/manifests/geometry_v3_div2k_calibration.csv -text
+data/manifests/geometry_v3_div2k_test.csv -text
+data/manifests/geometry_v3_w_bench_calibration.csv -text
+data/manifests/geometry_v3_w_bench_test.csv -text
+scripts/analyze_geometry_v3.py -text
+scripts/collect_geometry_v3.py -text
+scripts/run_border_stress.py -text
+src/watermark_lab/attacks/basic.py -text
+src/watermark_lab/innovations/budget_geometry.py -text
+src/watermark_lab/innovations/content_adaptive.py -text
+src/watermark_lab/innovations/geometry_sync.py -text
+src/watermark_lab/models/am_wam.py -text
+src/watermark_lab/models/wam_adapter.py -text

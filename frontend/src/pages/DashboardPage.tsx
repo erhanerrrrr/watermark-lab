@@ -2,6 +2,7 @@ import { Activity, ArrowUpRight, Beaker, CheckCircle2, Database, FileBarChart, L
 import { Link } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ApiRequired, MetricCard, PageHeader, StatusBadge } from '../components/Layout'
+import { GeometrySummary } from '../components/GeometrySummary'
 import { useApi } from '../services/ApiContext'
 
 const percent = (value: number) => `${(value * 100).toFixed(2)}%`
@@ -26,8 +27,9 @@ export function DashboardPage() {
       <MetricCard label="当前可运行模型" value={String(catalog.models.filter((model) => model.available).length)} hint={`共接入 ${catalog.models.length} 个模型`} icon={Layers3} accent="blue" />
       <MetricCard label="本地数据资产" value={`${catalog.datasets.filter((dataset) => dataset.ready).length}/${catalog.datasets.length}`} hint={`${catalog.datasets.reduce((sum, item) => sum + item.found_images, 0)} 张已找到`} icon={Database} accent="violet" />
       <MetricCard label="正式实验记录" value={catalog.formal.records.toLocaleString()} hint={`${catalog.formal.test_images} test · ${catalog.formal.attack_cases} 条攻击`} icon={FileBarChart} accent="green" />
-      <MetricCard label="最佳完整恢复率" value={`${best.recovery.toFixed(2)}%`} hint={`${best.display_name} · ${source}`} icon={Sparkles} accent="amber" />
+      <MetricCard label="formal-v1 最佳完整恢复率" value={`${best.recovery.toFixed(2)}%`} hint={`${best.display_name} · ${source}`} icon={Sparkles} accent="amber" />
     </section>
+    <GeometrySummary />
     <section className="dashboard-grid">
       <div className="panel chart-panel">
         <div className="panel-heading"><div><span className="panel-kicker">冻结正式结果</span><h2>四种方法恢复性能</h2></div><span className="panel-meta">{source}</span></div>

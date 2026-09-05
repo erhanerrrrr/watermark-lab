@@ -6,6 +6,7 @@ import math
 import threading
 import time
 import uuid
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
@@ -15,7 +16,9 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 
 from watermark_lab.api.schemas import DecodeResponse, ExperimentRecord
+from watermark_lab.api.trustmark_runtime import IsolatedTrustMarkModel, TrustMarkWorkerClient
 from watermark_lab.attacks.basic import AttackSpec, apply_attack
+from watermark_lab.attacks.boundary_rotation import rotate_boundary
 from watermark_lab.attacks.protocol import AttackCase, apply_attack_case
 from watermark_lab.core.registry import create_model
 from watermark_lab.core.types import BitArray, ImageArray
@@ -24,8 +27,11 @@ from watermark_lab.metrics.message import ber, bit_accuracy, complete_recovery
 
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 MAX_IMAGE_PIXELS = 25_000_000
-SUPPORTED_API_MODELS = ("lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam")
-SUPPORTED_API_ATTACKS = ("none", "jpeg", "noise", "crop", "resize", "rotate", "tamper", "compound")
+SUPPORTED_API_MODELS = ("lsb_reference", "dwt_dct", "trustmark_q", "wam", "am_wam", "budget_wam")
+SUPPORTED_API_ATTACKS = (
+    "none", "jpeg", "noise", "crop", "resize", "rotate", "tamper", "compound",
+    "rotate_black", "rotate_reflect", "rotate_crop_resize",
+)
 
 _model_lock = threading.Lock()
 
@@ -83,6 +89,11 @@ def build_attack(attack: str, parameter: float) -> AttackSpec | AttackCase:
         return AttackSpec("resize_roundtrip", {"scale": _bounded(parameter, 0.1, 2)})
     if attack == "rotate":
         return AttackSpec("rotation", {"angle": _bounded(parameter, -180, 180)})
+    if attack.startswith("rotate_"):
+        return AttackSpec(
+            "boundary_rotation",
+            {"angle": _bounded(parameter, -30, 30), "boundary": attack.removeprefix("rotate_")},
+        )
     if attack == "tamper":
         return AttackSpec("local_splice", {"mask_ratio": _bounded(parameter, 0.001, 0.9)})
     return AttackCase(
@@ -104,19 +115,41 @@ def get_wam_backend(device: str):
 
 
 @lru_cache(maxsize=12)
-def get_model(model_name: str, strength: float, device: str):
+def get_model(
+    model_name: str, strength: float, device: str,
+    trustmark_worker: TrustMarkWorkerClient | None = None,
+):
     if model_name not in SUPPORTED_API_MODELS:
         raise ValueError(f"不支持的模型：{model_name}")
+    if model_name == "trustmark_q" and trustmark_worker is not None:
+        if device != "auto":
+            actual_device = trustmark_worker.ensure_ready().get("device")
+            if device != actual_device and not (device == "cuda:0" and actual_device == "cuda"):
+                raise ValueError(
+                    f"TrustMark 独立环境使用 {actual_device}；请选择 auto 或对应设备"
+                )
+        return IsolatedTrustMarkModel(trustmark_worker, strength)
     arguments: dict[str, Any] = {}
     if model_name != "lsb_reference":
         arguments["strength"] = strength
-    if model_name in {"wam", "am_wam"}:
+    if model_name in {"wam", "am_wam", "budget_wam"}:
         arguments["device"] = device
         # WAM and AM-WAM are lightweight wrappers around the same official network.
         # Sharing one backend per device avoids loading duplicate GPU weights when
         # users switch model or strength in the Web interface.
         arguments["backend"] = get_wam_backend(device)
     return create_model(model_name, **arguments)
+
+
+def _inference_guard(model_name: str, worker: TrustMarkWorkerClient | None):
+    # The worker serializes its own model calls; CPU inference need not hold the GPU lock.
+    return nullcontext() if model_name == "trustmark_q" and worker is not None else _model_lock
+
+
+def _execution_metadata(model, requested_device: str) -> dict[str, Any]:
+    if isinstance(model, IsolatedTrustMarkModel):
+        return {**model.client.runtime_info, "requested_device": requested_device}
+    return {"execution_backend": "local", "device": requested_device}
 
 
 def _finite(value: float) -> float | None:
@@ -137,6 +170,7 @@ def run_single_experiment(
     attack_name: str,
     attack_parameter: float,
     device: str,
+    trustmark_worker: TrustMarkWorkerClient | None = None,
 ) -> CompletedExperiment:
     image = read_rgb_image(image_payload)
     attack = build_attack(attack_name, attack_parameter)
@@ -144,17 +178,18 @@ def run_single_experiment(
 
     # Official inference modules reuse mutable objects. Serialize one process's
     # inference while keeping HTTP file and catalog requests responsive.
-    with _model_lock:
-        model = get_model(model_name, float(strength), device)
+    with _inference_guard(model_name, trustmark_worker):
+        model = get_model(model_name, float(strength), device, trustmark_worker)
         bits = message_to_bits(message, model.message_bits)
         encode_started = time.perf_counter()
         embedded = model.encode(image, bits)
         encode_ms = (time.perf_counter() - encode_started) * 1000.0
-        attacked = (
-            apply_attack_case(embedded.image, attack, generator)
-            if isinstance(attack, AttackCase)
-            else apply_attack(embedded.image, attack, generator)
-        )
+        if isinstance(attack, AttackCase):
+            attacked = apply_attack_case(embedded.image, attack, generator)
+        elif attack.name == "boundary_rotation":
+            attacked = rotate_boundary(embedded.image, **attack.parameters)
+        else:
+            attacked = apply_attack(embedded.image, attack, generator)
         decode_started = time.perf_counter()
         decoded = model.decode(attacked)
         decode_ms = (time.perf_counter() - decode_started) * 1000.0
@@ -184,7 +219,10 @@ def run_single_experiment(
         post_attack_ssim=ssim(image, attacked),
         encode_ms=encode_ms,
         decode_ms=decode_ms,
-        metadata={"embed": embedded.metadata, "decode": decoded.metadata, "device": device},
+        metadata={
+            "embed": embedded.metadata, "decode": decoded.metadata,
+            **_execution_metadata(model, device),
+        },
     )
     return CompletedExperiment(
         record=record,
@@ -200,10 +238,11 @@ def run_embed(
     message: str,
     strength: float,
     device: str,
+    trustmark_worker: TrustMarkWorkerClient | None = None,
 ) -> tuple[str, datetime, ImageArray, dict[str, Any]]:
     image = read_rgb_image(image_payload)
-    with _model_lock:
-        model = get_model(model_name, float(strength), device)
+    with _inference_guard(model_name, trustmark_worker):
+        model = get_model(model_name, float(strength), device, trustmark_worker)
         bits = message_to_bits(message, model.message_bits)
         started = time.perf_counter()
         embedded = model.encode(image, bits)
@@ -216,7 +255,7 @@ def run_embed(
         "embed_psnr_db": _finite(psnr(image, embedded.image)),
         "embed_ssim": ssim(image, embedded.image),
         "encode_ms": encode_ms,
-        "metadata": {"embed": embedded.metadata, "device": device},
+        "metadata": {"embed": embedded.metadata, **_execution_metadata(model, device)},
     }
     return _identifier("EMB"), datetime.now().astimezone(), embedded.image, values
 
@@ -229,10 +268,11 @@ def run_decode(
     expected_message: str | None,
     strength: float,
     device: str,
+    trustmark_worker: TrustMarkWorkerClient | None = None,
 ) -> DecodeResponse:
     image = read_rgb_image(image_payload)
-    with _model_lock:
-        model = get_model(model_name, float(strength), device)
+    with _inference_guard(model_name, trustmark_worker):
+        model = get_model(model_name, float(strength), device, trustmark_worker)
         started = time.perf_counter()
         decoded = model.decode(image)
         decode_ms = (time.perf_counter() - started) * 1000.0
@@ -250,5 +290,5 @@ def run_decode(
             complete_recovery(expected, decoded.message) if expected is not None else None
         ),
         decode_ms=decode_ms,
-        metadata={"decode": decoded.metadata, "device": device},
+        metadata={"decode": decoded.metadata, **_execution_metadata(model, device)},
     )

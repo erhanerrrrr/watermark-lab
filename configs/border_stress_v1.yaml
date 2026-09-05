@@ -1,0 +1,29 @@
+suite:
+  id: border-stress-v1-exploratory
+  seed: 20260905
+  selection: first 10 entries per frozen formal-v1 test manifest; previously seen images
+  interpretation: exploratory mechanism diagnosis, not independent generalization evidence
+  expected_records: 960
+  hypotheses:
+    - Median-color corner gating may lose geometric recovery when padding changes.
+    - Black and reflect vary padding only; crop_resize also changes scale and field of view.
+    - Same-embedding identity control separates synchronization from adaptive embedding.
+  bootstrap_iterations: 2000
+
+inputs:
+  dataset_config: configs/robustness_v2_validation.yaml
+  calibration: configs/formal_calibrated_strengths.json
+  m4_config: configs/m4_ablation.yaml
+  frozen_geometry_commit: 18d973fb912b2005171589ce1ae2650e58d204c6
+  frozen_geometry_sha256: c41ce55a30b26c29f6803bd8f26065eb583f22fb0567f93121e2c42a2251b4a4
+
+attacks:
+  angles: [-12.7, 8.3, 12.7]
+  boundaries: [median, black, reflect, crop_resize]
+  resampling: Pillow bicubic
+  crop_rule: same-aspect central rectangle inside rotated support, two-pixel safety inset
+
+models: [wam, am_wam]
+same_embedding_identity_control: true
+outputs:
+  results_dir: results/border_stress_v1

@@ -1,10 +1,10 @@
 version: 1
-updated_at: "2026-09-04"
+updated_at: "2026-09-05"
 
 project:
   name: Watermark Lab
   subtitle: 面向复合攻击与局部篡改的数字图像水印实验平台
-  stage: M5.3
+  stage: M6
 
 models:
   lsb_reference:
@@ -47,6 +47,14 @@ models:
     robustness: 很高
     default_strength: 2.0
     accent: "#f59e0b"
+  budget_wam:
+    display_name: Budget-WAM
+    family: 本项目新方法
+    description: 依据解码证据按需执行几何校正，设置候选上限并支持提前停止。
+    detail: geometry-v3 单独验证；沿用质量反馈嵌入，策略仅在校准集选择。
+    robustness: 几何同步
+    default_strength: 2.0
+    accent: "#0f766e"
 
 datasets:
   - id: coco2017_val
@@ -137,13 +145,40 @@ interactive_attacks:
     default: 0.75
     unit: ×
   - id: rotate
-    display_name: 旋转
-    description: 旋转图像并保持原始画布尺寸。
+    display_name: 旋转 · 中值填充
+    description: 旋转图像并保持原始画布尺寸，空白处以中值颜色填充。
     parameter_label: 旋转角度
     minimum: -30
     maximum: 30
-    step: 1
+    step: 0.1
     default: 10
+    unit: °
+  - id: rotate_black
+    display_name: 旋转 · 黑色填充
+    description: 用黑色填充旋转后的边缘，检查几何同步对填充颜色的依赖。
+    parameter_label: 旋转角度
+    minimum: -30
+    maximum: 30
+    step: 0.1
+    default: 8.3
+    unit: °
+  - id: rotate_reflect
+    display_name: 旋转 · 反射填充
+    description: 反射图像边缘后旋转，保持画布尺寸与原图中心。
+    parameter_label: 旋转角度
+    minimum: -30
+    maximum: 30
+    step: 0.1
+    default: -12.7
+    unit: °
+  - id: rotate_crop_resize
+    display_name: 旋转 · 裁边缩放
+    description: 旋转后裁去空白边缘，再缩放回原图尺寸。
+    parameter_label: 旋转角度
+    minimum: -30
+    maximum: 30
+    step: 0.1
+    default: 8.3
     unit: °
   - id: tamper
     display_name: 局部篡改

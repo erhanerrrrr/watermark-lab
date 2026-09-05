@@ -49,12 +49,19 @@ def _am_wam_factory(**kwargs: Any) -> WatermarkModel:
     return AmWamModel(**kwargs)
 
 
+def _budget_wam_factory(**kwargs: Any) -> WatermarkModel:
+    from watermark_lab.models.budget_wam import BudgetWamModel
+
+    return BudgetWamModel(**kwargs)
+
+
 MODEL_SPECS: tuple[ModelSpec, ...] = (
     ModelSpec("lsb_reference", "M1", "管线自检模型", _lsb_factory),
     ModelSpec("dwt_dct", "M2", "传统频域主基线", _dwt_dct_factory),
     ModelSpec("trustmark_q", "M2", "强全局深度水印基线", _trustmark_factory),
     ModelSpec("wam", "M3", "核心前沿复现模型", _wam_factory),
     ModelSpec("am_wam", "M4", "几何同步与内容自适应改进模型", _am_wam_factory),
+    ModelSpec("budget_wam", "M6", "证据驱动的预算约束几何同步", _budget_wam_factory),
     ModelSpec("hidden", "可选", "早期端到端深度水印基线"),
 )
 

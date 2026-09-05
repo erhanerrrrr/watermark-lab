@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -37,6 +37,8 @@ class ApiModelInfo(BaseModel):
     default_strength: float = Field(gt=0.0)
     accent: str
     available: bool
+    execution_backend: Literal["local", "isolated"] = "local"
+    runtime_label: str = "当前服务"
     reason: str | None = None
     formal_metrics: FormalModelMetrics | None = None
 
@@ -141,9 +143,9 @@ class ExperimentSummary(BaseModel):
     ber: float = Field(ge=0.0, le=1.0)
     complete_recovery: bool
     embed_psnr_db: float | None
-    embed_ssim: float = Field(ge=0.0, le=1.0)
+    embed_ssim: float = Field(ge=-1.0, le=1.0)
     post_attack_psnr_db: float | None
-    post_attack_ssim: float = Field(ge=0.0, le=1.0)
+    post_attack_ssim: float = Field(ge=-1.0, le=1.0)
     encode_ms: float = Field(ge=0.0)
     decode_ms: float = Field(ge=0.0)
 
@@ -173,7 +175,7 @@ class EmbedResponse(BaseModel):
     message_bits: int
     expected_message: str
     embed_psnr_db: float | None
-    embed_ssim: float = Field(ge=0.0, le=1.0)
+    embed_ssim: float = Field(ge=-1.0, le=1.0)
     encode_ms: float = Field(ge=0.0)
     embedded_image_url: str
     metadata: dict[str, Any]
