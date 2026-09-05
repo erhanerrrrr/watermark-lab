@@ -130,6 +130,17 @@ def verify_datasets() -> list[dict[str, Any]]:
                     mismatched.append(f"{split}/{row['relative_path']}")
                     continue
                 verified += 1
+        valid = verified == expected
+        # A fresh checkout intentionally does not carry the licensed image files.
+        # Keep this distinct from corruption so the UI can explain how to prepare data.
+        if valid:
+            status = "ready"
+        elif mismatched:
+            status = "mismatch"
+        elif verified == 0:
+            status = "not_prepared"
+        else:
+            status = "partial"
         reports.append(
             {
                 "id": dataset["id"],
@@ -137,7 +148,8 @@ def verify_datasets() -> list[dict[str, Any]]:
                 "verified": verified,
                 "missing": missing,
                 "mismatched": mismatched,
-                "valid": verified == expected,
+                "valid": valid,
+                "status": status,
             }
         )
     return reports

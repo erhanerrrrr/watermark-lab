@@ -202,6 +202,7 @@ export interface DatasetVerification {
   missing: string[]
   mismatched: string[]
   valid: boolean
+  status: 'ready' | 'not_prepared' | 'partial' | 'mismatch'
 }
 
 export interface ResearchEvidenceRow {

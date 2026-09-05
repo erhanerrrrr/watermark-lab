@@ -128,6 +128,7 @@ class DatasetVerification(BaseModel):
     missing: list[str]
     mismatched: list[str]
     valid: bool
+    status: Literal["ready", "not_prepared", "partial", "mismatch"]
 
 
 class ExperimentSummary(BaseModel):
